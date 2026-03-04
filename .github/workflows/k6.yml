@@ -16,10 +16,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install deps (k6, LLVM/Clang, jq)
+      - name: Install deps (k6, LLVM/Clang, jq, ripgrep)
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y ca-certificates curl gnupg jq clang llvm lld
+          sudo apt-get install -y ca-certificates curl gnupg jq ripgrep clang llvm lld
           sudo mkdir -p /etc/apt/keyrings
           curl -fsSL https://dl.k6.io/key.gpg | sudo gpg --dearmor -o /etc/apt/keyrings/k6.gpg
           echo "deb [signed-by=/etc/apt/keyrings/k6.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
