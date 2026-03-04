@@ -6,7 +6,7 @@ This repo is a runnable demo of that philosophy:
 - **Server** (`demo/server.ll`) — HTTP/1.1 server in LLVM IR with PCF-style metadata; serves static assets only.
 - **WASM workload** (`demo/fractal.ll` → `public/fractal.wasm`) — Mandelbrot generator compiled to wasm32.
 - **Client** (`demo/public/index.html`) — minimal HTML/JS: fetches the WASM, calls `generate_fractal`, and blits the returned pixel buffer directly to a `<canvas>`.
-- **Benchmarks** — exercised via conventional k6 scenarios in CI; results live in `docs/benchmark.md` (also published as artifact `k6-summary/benchmark.md`).
+- **Benchmarks** — exercised via conventional k6 scenarios in CI; results live in `benchmark.md` (also published as artifact `k6-summary/benchmark.md`).
 
 ![Fractal output](docs/fractal-demo.png)
 
@@ -32,7 +32,7 @@ Steps:
 3) **Verify invariants** (lightweight proof checks): `cd demo && ./verify.sh`
 
 ## Benchmarks
-- Latest results: see `docs/benchmark.md` (kept in-repo; CI also publishes the same file as artifact `k6-summary/benchmark.md`). Canonical scenarios: single VU and 1000 VU, reporting RPS and p95 latency.
+- Latest results: see `benchmark.md` (kept in-repo; CI also publishes the same file as artifact `k6-summary/benchmark.md`). Canonical scenarios: single VU and 1000 VU, reporting RPS and p95 latency.
 - Run locally with any k6 script that hits `http://localhost:9090/`; for example:
   ```bash
   k6 run -e TARGET=http://localhost:9090 - <<'EOF'
