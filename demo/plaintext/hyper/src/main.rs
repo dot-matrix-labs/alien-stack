@@ -1,7 +1,7 @@
 use hyper::{service::{make_service_fn, service_fn}, Body, Request, Response, Server};
 use std::convert::Infallible;
 use std::env;
-use std::net::SocketAddr;
+use std::net::{SocketAddr, TcpListener};
 
 async fn handle(_req: Request<Body>) -> Result<Response<Body>, Infallible> {
     Ok(Response::builder()
@@ -26,7 +26,8 @@ fn main() {
         .enable_all()
         .build()
         .unwrap();
+    let listener = TcpListener::bind(addr).unwrap();
     runtime
-        .block_on(Server::bind(&addr).serve(make_service))
+        .block_on(Server::from_tcp(listener).unwrap().serve(make_service))
         .unwrap();
 }
