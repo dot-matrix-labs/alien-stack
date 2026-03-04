@@ -74,10 +74,15 @@ target triple = "x86_64-pc-linux-gnu"
 
 ; @global request parser strings
 @req_fractal = private unnamed_addr constant [18 x i8] c"GET /fractal.wasm\00"
+@req_bench   = private unnamed_addr constant [11 x i8] c"GET /bench\00"
 
 ; @global header/response templates
 @fmt_header_200 = private unnamed_addr constant [62 x i8] c"HTTP/1.1 200 OK\0D\0A%sContent-Length: %ld\0D\0AConnection: close\0D\0A\0D\0A\00"
 @response_404   = private unnamed_addr constant [100 x i8] c"HTTP/1.1 404 Not Found\0D\0AContent-Type: text/plain\0D\0AContent-Length: 9\0D\0AConnection: close\0D\0A\0D\0ANot Found\00"
+
+; @global benchmark response (tiny, in-memory): 59 bytes total
+@bench_resp = private unnamed_addr constant [59 x i8] c"HTTP/1.1 200 OK\0D\0AContent-Length: 2\0D\0AConnection: close\0D\0A\0D\0AOK"
+@bench_resp_len = private unnamed_addr constant i64 59
 
 ; @global helper strings (used by @get_content_type)
 @str_wasm = private unnamed_addr constant [6 x i8] c".wasm\00"
@@ -375,6 +380,14 @@ parse_request:
   ; Null-terminate after the received data (one store, no memset)
   %null_pos = getelementptr i8, i8* %req_ptr, i64 %bytes_read
   store i8 0, i8* %null_pos, align 1
+
+  ; Bench path (micro response for RPS measurement)
+  %bench_str   = getelementptr [11 x i8], [11 x i8]* @req_bench, i64 0, i64 0
+  %bench_match = call i8* @strstr(i8* %req_ptr, i8* %bench_str)
+  %is_bench    = icmp ne i8* %bench_match, null
+  br i1 %is_bench, label %serve_bench, label %check_fractal
+
+check_fractal:
   %fractal_str   = getelementptr [18 x i8], [18 x i8]* @req_fractal, i64 0, i64 0
   %fractal_match = call i8* @strstr(i8* %req_ptr, i8* %fractal_str)
   %is_fractal    = icmp ne i8* %fractal_match, null
@@ -384,6 +397,13 @@ serve_wasm:
   %wasm_ptr = getelementptr [266240 x i8], [266240 x i8]* @wasm_resp, i64 0, i64 0
   %wasm_len = load i64, i64* @wasm_resp_len, align 8
   call i64 @write(i32 %client_fd, i8* %wasm_ptr, i64 %wasm_len)
+  call i32 @close(i32 %client_fd)
+  ret void
+
+serve_bench:
+  %bench_ptr = getelementptr [59 x i8], [59 x i8]* @bench_resp, i64 0, i64 0
+  %bench_len = load i64, i64* @bench_resp_len
+  call i64 @write(i32 %client_fd, i8* %bench_ptr, i64 %bench_len)
   call i32 @close(i32 %client_fd)
   ret void
 

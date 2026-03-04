@@ -31,7 +31,7 @@ jobs:
       - name: Run k6 scenarios (1-VU and 1000-VU)
         working-directory: demo
         env:
-          TARGET_URL: http://127.0.0.1:9090/
+          TARGET_URL: http://127.0.0.1:9090/bench
         run: |
           # start server in background
           ./laststack-server >/tmp/laststack-server.log 2>&1 &
