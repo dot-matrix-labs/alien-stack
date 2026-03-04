@@ -58,6 +58,13 @@ An HTTP server written in LLVM IR that serves static files. Extends the current 
 | `/` | index.html | text/html |
 | `/fractal.wasm` | fractal.wasm | application/wasm |
 
+**Performance optimizations (as of Mar 2026):**
+- Assets are loaded once at startup into globals; complete HTTP responses (headers + body) are prebuilt in memory.
+- Request handling uses a single shared 1 KB buffer; only a terminating null byte is written per request (no memset).
+- Hot path is three syscalls per request: `read` → `write` → `close`; no per-request `open/read/close` or `snprintf`.
+- Static 404 response length is precomputed; large per-request stack buffers removed.
+- CI k6 job publishes `benchmark.md` with single-VU and 1000-VU RPS/p95 latency for each run (artifact `k6-summary`).
+
 **Metadata annotations:**
 - `@pre` - socket bound, file descriptors valid
 - `@post` - response sent, connection closed
