@@ -40,6 +40,12 @@ json_escape() {
   printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
 }
 
+grep_first() {
+  local pattern="$1"
+  local file="$2"
+  grep -E "$pattern" "$file" | head -n 1 || true
+}
+
 add_error() {
   errors+=("$1")
 }
@@ -47,7 +53,7 @@ add_error() {
 if [ ! -f "$VERIFY_REPORT" ]; then
   add_error "missing verifier report: $VERIFY_REPORT"
 else
-  if ! rg -q '"status"\s*:\s*"pass"' "$VERIFY_REPORT"; then
+  if ! grep -E -q '"status"[[:space:]]*:[[:space:]]*"pass"' "$VERIFY_REPORT"; then
     add_error "verifier report is not pass: $VERIFY_REPORT"
   fi
 fi
@@ -65,13 +71,13 @@ has_full_pcf_signature() {
   local file="$1"
   local fn="$2"
   local sig
-  sig=$(rg -N "^define .*@${fn}\\b" "$file" | head -n 1 || true)
+  sig=$(grep_first "^define .*@${fn}([[:space:]]|\\()" "$file")
   if [ -z "$sig" ]; then
     return 1
   fi
   local tag
   for tag in schema toolchain pre post proof effects bind; do
-    if ! printf '%s\n' "$sig" | rg -q "!pcf\\.${tag} ![0-9]+"; then
+    if ! printf '%s\n' "$sig" | grep -E -q "!pcf\\.${tag} ![0-9]+"; then
       return 1
     fi
   done
@@ -83,18 +89,18 @@ effect_is_known() {
   local fn="$2"
   local sig id effect_line
 
-  sig=$(rg -N "^define .*@${fn}\\b" "$file" | head -n 1 || true)
+  sig=$(grep_first "^define .*@${fn}([[:space:]]|\\()" "$file")
   id=$(printf '%s\n' "$sig" | sed -nE 's/.*!pcf\.effects !([0-9]+).*/\1/p')
   if [ -z "$id" ]; then
     return 1
   fi
 
-  effect_line=$(rg -N "^!${id} = !\{!\"pcf\.effects\"" "$file" | head -n 1 || true)
+  effect_line=$(grep_first "^!${id} = !\\{!\"pcf\\.effects\"" "$file")
   if [ -z "$effect_line" ]; then
     return 1
   fi
 
-  if printf '%s\n' "$effect_line" | rg -q "effect\.unknown"; then
+  if printf '%s\n' "$effect_line" | grep -E -q "effect\\.unknown"; then
     return 1
   fi
 

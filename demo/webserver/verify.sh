@@ -51,6 +51,18 @@ json_escape() {
   printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
 }
 
+grep_first() {
+  local pattern="$1"
+  local file="$2"
+  grep -E "$pattern" "$file" | head -n 1 || true
+}
+
+grep_all() {
+  local pattern="$1"
+  local file="$2"
+  grep -E "$pattern" "$file" || true
+}
+
 required_tags=("schema" "toolchain" "pre" "post" "proof" "effects" "bind")
 
 check_required_function() {
@@ -59,7 +71,7 @@ check_required_function() {
   local sig
 
   checked_functions=$((checked_functions + 1))
-  sig=$(rg -N "^define .*@${fn}\\b" "$file" | head -n 1 || true)
+  sig=$(grep_first "^define .*@${fn}([[:space:]]|\\()" "$file")
 
   if [ -z "$sig" ]; then
     add_error "$file:$fn missing function definition"
@@ -69,7 +81,7 @@ check_required_function() {
   local missing=()
   local tag
   for tag in "${required_tags[@]}"; do
-    if ! printf '%s\n' "$sig" | rg -q "!pcf\\.${tag} ![0-9]+"; then
+    if ! printf '%s\n' "$sig" | grep -E -q "!pcf\\.${tag} ![0-9]+"; then
       missing+=("$tag")
     fi
   done
@@ -88,7 +100,7 @@ check_metadata_kind_exists() {
   local kind="$2"
   local count
 
-  count=$(rg -N -c "^![0-9]+ = !\\{!\"pcf\\.${kind}\"" "$file" || true)
+  count=$(grep -E -c "^![0-9]+ = !\\{!\"pcf\\.${kind}\"" "$file" || true)
   if [ "${count:-0}" -eq 0 ]; then
     add_error "$file missing metadata definitions for pcf.${kind}"
   fi
@@ -107,12 +119,12 @@ check_metadata_reference_resolution() {
       local id
       id=$(printf '%s\n' "$line" | sed -nE "s/.*!pcf\\.${tag} !([0-9]+).*/\\1/p")
       if [ -n "$id" ]; then
-        if ! rg -N -q "^!${id} = " "$file"; then
+        if ! grep -E -q "^!${id} = " "$file"; then
           add_error "$file:$fn references missing metadata node !${id} for pcf.${tag}"
         fi
       fi
     done
-  done < <(rg -N "^define .*@" "$file")
+  done < <(grep_all "^define .*@" "$file")
 }
 
 check_effect_payloads() {
@@ -120,10 +132,10 @@ check_effect_payloads() {
   local line
 
   while IFS= read -r line; do
-    if printf '%s\n' "$line" | rg -q "effect\\.unknown"; then
+    if printf '%s\n' "$line" | grep -E -q "effect\\.unknown"; then
       add_error "$file has unresolved effect atom in metadata: $line"
     fi
-  done < <(rg -N "^![0-9]+ = !\\{!\"pcf\\.effects\"" "$file" || true)
+  done < <(grep_all "^![0-9]+ = !\\{!\"pcf\\.effects\"" "$file")
 }
 
 check_module() {

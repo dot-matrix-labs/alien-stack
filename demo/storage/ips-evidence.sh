@@ -56,7 +56,7 @@ run_expect_success() {
 
   local output
   if output=$("$@" 2>&1); then
-    if printf '%s\n' "$output" | rg -q "$expect"; then
+    if printf '%s\n' "$output" | grep -E -q "$expect"; then
       checks_passed=$((checks_passed + 1))
     else
       add_error "$name: output mismatch (expected /$expect/), got: $output"

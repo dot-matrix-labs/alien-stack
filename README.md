@@ -12,7 +12,6 @@ This repository now has two separate demos:
 
 - LLVM toolchain (`llc`, `wasm-ld` preferred; `clang` fallback for wasm build)
 - `clang` for native binaries
-- `rg` (ripgrep) for gate scripts
 - POSIX shell tools
 
 ## Webserver Demo
