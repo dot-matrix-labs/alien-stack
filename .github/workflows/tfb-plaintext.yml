@@ -37,7 +37,7 @@ jobs:
       - name: Run LLVM plaintext workload
         working-directory: demo/plaintext
         run: |
-          bash run-benchmark.sh llvmir 18081 ./laststack-plaintext
+          bash run-benchmark.sh llvmir ./laststack-plaintext
 
       - name: Run Hyper baseline workload
         working-directory: demo/plaintext

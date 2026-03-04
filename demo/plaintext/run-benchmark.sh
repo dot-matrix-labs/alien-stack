@@ -4,15 +4,22 @@
 # =============================================================================
 set -euo pipefail
 
-if [ "$#" -lt 3 ]; then
-  echo "Usage: $0 <label> <port> <command...>"
+if [ "$#" -lt 2 ]; then
+  echo "Usage: $0 <label> [port] <command...>"
   exit 1
 fi
 
 PLAINTEXT_PORT=18081
 LABEL="$1"
-REQUESTED_PORT="$2"
-shift 2
+shift
+
+if [[ "$1" =~ ^[0-9]+$ ]] && [ "$#" -gt 1 ]; then
+  SERVER_PORT="$1"
+  shift
+else
+  SERVER_PORT="$PLAINTEXT_PORT"
+fi
+
 CMD=("$@")
 LOG_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/artifacts"
 mkdir -p "$LOG_DIR"
@@ -28,14 +35,10 @@ fi
 
 echo "label,concurrency,requests_per_sec,latency_avg" > "$RESULT_FILE"
 
-if [ "$REQUESTED_PORT" != "$PLAINTEXT_PORT" ]; then
-  echo "note: plaintext server only listens on ${PLAINTEXT_PORT}; ignoring requested port ${REQUESTED_PORT}"
-fi
-
-TFB_URL="http://127.0.0.1:${PLAINTEXT_PORT}/plaintext"
+TFB_URL="http://127.0.0.1:${SERVER_PORT}/plaintext"
 
 start_server() {
-  TFB_PORT="$PLAINTEXT_PORT" PORT="$PLAINTEXT_PORT" "${CMD[@]}" >"$SERVER_LOG" 2>&1 &
+  TFB_PORT="$SERVER_PORT" PORT="$SERVER_PORT" "${CMD[@]}" >"$SERVER_LOG" 2>&1 &
   SERVER_PID=$!
   trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
   sleep 1
