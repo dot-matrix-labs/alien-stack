@@ -114,6 +114,8 @@ jobs:
           CONC_RPS=$(jq '.metrics.http_reqs.rate' demo/k6-1000.json)
           CONC_P95=$(jq '.metrics.http_req_duration["p(95)"]' demo/k6-1000.json)
 
+          [ -f benchmark.md ] && cp benchmark.md /tmp/benchmark_prev.md || true
+
           {
             echo "# Benchmarks"
             echo "Run: $DATE"
@@ -123,9 +125,9 @@ jobs:
             echo "| single_vu | $SINGLE_RPS | $SINGLE_P95 |"
             echo "| 1000_vus | $CONC_RPS | $CONC_P95 |"
             echo ""
-            if [ -f benchmark.md ]; then
+            if [ -f /tmp/benchmark_prev.md ]; then
               echo "## Previous runs";
-              cat benchmark.md
+              cat /tmp/benchmark_prev.md
             fi
           } > benchmark.md
 
