@@ -9,8 +9,9 @@ if [ "$#" -lt 3 ]; then
   exit 1
 fi
 
+PLAINTEXT_PORT=18081
 LABEL="$1"
-PORT="$2"
+REQUESTED_PORT="$2"
 shift 2
 CMD=("$@")
 LOG_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/artifacts"
@@ -27,10 +28,14 @@ fi
 
 echo "label,concurrency,requests_per_sec,latency_avg" > "$RESULT_FILE"
 
-TFB_URL="http://127.0.0.1:${PORT}/plaintext"
+if [ "$REQUESTED_PORT" != "$PLAINTEXT_PORT" ]; then
+  echo "note: plaintext server only listens on ${PLAINTEXT_PORT}; ignoring requested port ${REQUESTED_PORT}"
+fi
+
+TFB_URL="http://127.0.0.1:${PLAINTEXT_PORT}/plaintext"
 
 start_server() {
-  TFB_PORT="$PORT" PORT="$PORT" "${CMD[@]}" >"$SERVER_LOG" 2>&1 &
+  TFB_PORT="$PLAINTEXT_PORT" PORT="$PLAINTEXT_PORT" "${CMD[@]}" >"$SERVER_LOG" 2>&1 &
   SERVER_PID=$!
   trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
   sleep 1

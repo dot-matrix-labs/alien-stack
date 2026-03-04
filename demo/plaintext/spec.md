@@ -4,7 +4,7 @@
 Deliver a handwritten LLVM IR HTTP server that satisfies the TechEmpower FrameworkBenchmarks `plaintext` test. The server must respond to `GET /plaintext` (and any path) with `200 OK`, a `Content-Type: text/plain` header, and the constant body `Hello, World!` without heap allocations or standard library abstractions.
 
 ## Requirements
-- Listen on the port supplied in `$TFB_PORT`, fallback to `$PORT`, then `8080` if unset.
+- Listen on port `18081` without needing env vars.
 - Single-threaded accept loop; no connection pooling or `tokio`.
 - Response is a single prebuilt buffer owned by the binary.
 - PCF metadata attached to every gate-controlled function (`respond_plaintext`, `handle_client`, `main`).
