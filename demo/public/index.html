@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>LastStack: Fractal WASM Demo</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0a0a; }
+    canvas { display: block; width: 100vw; height: 100vh; }
+    #loading {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #00ff41;
+      font-family: 'Courier New', monospace;
+      font-size: 1.5em;
+      text-shadow: 0 0 20px #00ff41;
+    }
+    #error {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #ff3333;
+      font-family: 'Courier New', monospace;
+      font-size: 1em;
+      text-shadow: 0 0 10px #ff3333;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="loading">Initializing LastStack WASM...</div>
+  <div id="error"></div>
+  <canvas id="canvas"></canvas>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const loading = document.getElementById('loading');
+    const error = document.getElementById('error');
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    async function init() {
+      try {
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const response = await fetch('/fractal.wasm');
+        if (!response.ok) throw new Error('Failed to load fractal.wasm');
+        
+        const buffer = await response.arrayBuffer();
+        const module = await WebAssembly.compile(buffer);
+        const instance = await WebAssembly.instantiate(module, {});
+        
+        const wasm = instance.exports;
+        
+        const width = canvas.width;
+        const height = canvas.height;
+        const maxIter = 100;
+        
+        const ptr = wasm.generate_fractal(width, height, maxIter);
+        if (ptr === 0) throw new Error('WASM generate_fractal failed');
+        
+        const bufSize = wasm.get_buffer_size();
+        const buf = new Uint8Array(wasm.memory.buffer, ptr, bufSize);
+        
+        const imageData = ctx.createImageData(width, height);
+        imageData.data.set(buf);
+        ctx.putImageData(imageData, 0, 0);
+        
+        loading.style.display = 'none';
+        console.log('[LastStack] Fractal rendered successfully');
+        
+      } catch (e) {
+        loading.style.display = 'none';
+        error.style.display = 'block';
+        error.textContent = 'Error: ' + e.message;
+        console.error('[LastStack] Error:', e);
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
