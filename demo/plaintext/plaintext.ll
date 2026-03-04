@@ -4,7 +4,7 @@
 ; Minimal single-threaded TCP server responding with constant plaintext payload.
 ; Designed to mirror TechEmpower plaintext test expectations.
 ;
-; - Listens on port specified by $TFB_PORT, falling back to $PORT then 8080.
+; - Listens on fixed port 18081.
 ; - Responds to any request with HTTP/1.1 200 OK and "Hello, World!" body.
 ; - No allocation; single shared response buffer.
 ; - Includes PCF metadata for verification and linking.
@@ -18,8 +18,6 @@ target triple = "x86_64-pc-linux-gnu"
 
 @plaintext_response = private unnamed_addr constant [108 x i8] c"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 13\r\nConnection: close\r\n\r\nHello, World!\00"
 @plaintext_response_len = private unnamed_addr constant i64 108
-@env_tfb_port = private unnamed_addr constant [9 x i8] c"TFB_PORT\00"
-@env_port = private unnamed_addr constant [5 x i8] c"PORT\00"
 
 ; External dependencies (libc / syscalls)
 declare i32 @socket(i32, i32, i32)
@@ -31,8 +29,6 @@ declare i64 @read(i32, i8*, i64)
 declare i64 @write(i32, i8*, i64)
 declare i32 @close(i32)
 declare i32 @htons(i32)
-declare i8* @getenv(i8*)
-declare i32 @atoi(i8*)
 declare void @llvm.memcpy.p0i8.p0i8.i64(i8*, i8*, i64, i1)
 
 define void @respond_plaintext(i32 %client_fd) !pcf.schema !30 !pcf.toolchain !31 !pcf.pre !1 !pcf.post !2 !pcf.proof !3 !pcf.effects !4 !pcf.bind !5 {
@@ -54,28 +50,10 @@ entry:
 
 define i32 @main() !pcf.schema !30 !pcf.toolchain !31 !pcf.pre !11 !pcf.post !12 !pcf.proof !13 !pcf.effects !14 !pcf.bind !15 {
 entry:
-  %tfb_env = call i8* @getenv(i8* getelementptr inbounds ([9 x i8], [9 x i8]* @env_tfb_port, i32 0, i32 0))
-  %tfb_missing = icmp eq i8* %tfb_env, null
-  br i1 %tfb_missing, label %port_env_check, label %parse_tfb
-
-parse_tfb:
-  %tfb_port = call i32 @atoi(i8* %tfb_env)
-  br label %port_ready
-
-port_env_check:
-  %port_env = call i8* @getenv(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @env_port, i32 0, i32 0))
-  %port_env_missing = icmp eq i8* %port_env, null
-  br i1 %port_env_missing, label %use_default_port, label %parse_port_env
-
-parse_port_env:
-  %parsed_port = call i32 @atoi(i8* %port_env)
-  br label %port_ready
-
-use_default_port:
   br label %port_ready
 
 port_ready:
-  %port_phi = phi i32 [8080, %use_default_port], [%parsed_port, %parse_port_env], [%tfb_port, %parse_tfb]
+  %port_phi = add i32 18081, 0
   %sockfd = call i32 @socket(i32 2, i32 1, i32 0)
   %socket_ok = icmp sge i32 %sockfd, 0
   br i1 %socket_ok, label %setup_socket, label %socket_fail
@@ -141,7 +119,7 @@ handle_client_block:
 !11 = !{!"pcf.pre", !"smt", !"(assert true)"}
 !12 = !{!"pcf.post", !"smt", !"(assert (or (= exit_code #x00000000) (= exit_code #x00000001)))"}
 !13 = !{!"pcf.proof", !"witness", !"strategy: socket-bind-listen-accept loop"}
-!14 = !{!"pcf.effects", !"libc.socket,libc.setsockopt,libc.bind,libc.listen,libc.accept,libc.close,libc.getenv,libc.atoi,libc.htons"}
+!14 = !{!"pcf.effects", !"libc.socket,libc.setsockopt,libc.bind,libc.listen,libc.accept,libc.close,libc.htons"}
 !15 = !{!"pcf.bind", !"ret->exit_code"}
 
 !30 = !{!"pcf.schema", !"laststack.pcf.v1"}
