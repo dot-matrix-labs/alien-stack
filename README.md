@@ -1,4 +1,4 @@
-# LastStack Demo
+# LastStack
 
 LastStack is an agent-first software architecture described in `docs/white-paper.md`. There are some demos to show the feasibility of end to end web systems, and code benchmarked against Rust.
 
