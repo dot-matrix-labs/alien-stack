@@ -16,8 +16,8 @@ target triple = "x86_64-pc-linux-gnu"
 
 %struct.sockaddr_in = type { i16, i16, i32, [8 x i8] }
 
-@plaintext_response = private unnamed_addr constant [108 x i8] c"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 13\r\nConnection: close\r\n\r\nHello, World!\00"
-@plaintext_response_len = private unnamed_addr constant i64 108
+@plaintext_response = private unnamed_addr constant [97 x i8] c"HTTP/1.1 200 OK\0D\0AContent-Type: text/plain\0D\0AContent-Length: 13\0D\0AConnection: close\0D\0A\0D\0AHello, World!"
+@plaintext_response_len = private unnamed_addr constant i64 97
 
 ; External dependencies (libc / syscalls)
 declare i32 @socket(i32, i32, i32)
@@ -33,8 +33,8 @@ declare void @llvm.memcpy.p0i8.p0i8.i64(i8*, i8*, i64, i1)
 
 define void @respond_plaintext(i32 %client_fd) !pcf.schema !30 !pcf.toolchain !31 !pcf.pre !1 !pcf.post !2 !pcf.proof !3 !pcf.effects !4 !pcf.bind !5 {
 entry:
-  %resp_ptr = getelementptr [108 x i8], [108 x i8]* @plaintext_response, i64 0, i64 0
-  call i64 @write(i32 %client_fd, i8* %resp_ptr, i64 108)
+  %resp_ptr = getelementptr [97 x i8], [97 x i8]* @plaintext_response, i64 0, i64 0
+  call i64 @write(i32 %client_fd, i8* %resp_ptr, i64 97)
   ret void
 }
 
