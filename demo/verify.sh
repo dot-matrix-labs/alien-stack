@@ -1,10 +1,17 @@
 #!/bin/bash
 # ============================================================================
-# LastStack Demo: Invariant Verification
+# LastStack Demo: Verification Gate (fail-closed)
 # ============================================================================
-# Extracts PCF metadata from the LLVM IR and displays the proof-carrying
-# annotations. In a production system, these would be fed to Z3/CVC5 for
-# automated discharge.
+# Verifies that required functions carry complete PCF metadata and that
+# metadata references resolve to concrete metadata nodes.
+#
+# Output:
+#   - Human-readable summary to stdout
+#   - Machine-readable JSON report (default: verification-report.json)
+#
+# Exit codes:
+#   0 = verification pass
+#   1 = verification fail
 # ============================================================================
 
 set -euo pipefail
@@ -12,87 +19,188 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
-echo "============================================================================"
-echo " LastStack Verification Report"
-echo "============================================================================"
-echo ""
+REPORT_JSON="verification-report.json"
 
-# Extract function names and their PCF metadata
-echo "--- Proof-Carrying Functions (PCFs) ---"
-echo ""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --json)
+      shift
+      REPORT_JSON="${1:-$REPORT_JSON}"
+      ;;
+    *)
+      echo "[verify] unknown argument: $1" >&2
+      exit 1
+      ;;
+  esac
+  shift || true
+done
 
-# Parse the IR file for PCF-annotated functions
-while IFS= read -r line; do
-    func_name=$(echo "$line" | sed -nE 's/.*(@[A-Za-z_][A-Za-z0-9_.]*).*/\1/p')
-    has_pcf=$(echo "$line" | grep -c 'pcf\.' || true)
-    if [ "$has_pcf" -gt 0 ]; then
-        echo "  PCF: $func_name"
-        echo "    Annotations: $(echo "$line" | grep -oE '!pcf\.[A-Za-z_]+' | tr '\n' ', ' | sed 's/,$//')"
-        echo ""
+errors=()
+checked_functions=0
+passed_functions=0
+
+audit_file="/tmp/laststack-verify.$$.txt"
+: > "$audit_file"
+
+add_error() {
+  errors+=("$1")
+  echo "ERROR: $1" >> "$audit_file"
+}
+
+json_escape() {
+  printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
+}
+
+required_tags=("pre" "post" "proof" "effects" "bind")
+
+check_required_function() {
+  local file="$1"
+  local fn="$2"
+  local sig
+
+  checked_functions=$((checked_functions + 1))
+  sig=$(rg -N "^define .*@${fn}\\b" "$file" | head -n 1 || true)
+
+  if [ -z "$sig" ]; then
+    add_error "$file:$fn missing function definition"
+    return
+  fi
+
+  local missing=()
+  local tag
+  for tag in "${required_tags[@]}"; do
+    if ! printf '%s\n' "$sig" | rg -q "!pcf\\.${tag} ![0-9]+"; then
+      missing+=("$tag")
     fi
-done < <(grep -E 'define .* @' server.ll)
+  done
 
-echo ""
-echo "--- SMT Specifications ---"
-echo ""
+  if [ "${#missing[@]}" -gt 0 ]; then
+    add_error "$file:$fn missing !pcf.${missing[*]}"
+    return
+  fi
 
-# Extract SMT assertions from metadata
-grep -A2 -E 'pcf\.pre|pcf\.post' server.ll | sed -nE 's/.*("smt".*)/\1/p' | while IFS= read -r smt; do
-    echo "  $smt"
-    echo ""
-done
+  passed_functions=$((passed_functions + 1))
+  echo "OK: $file:$fn has full PCF coverage" >> "$audit_file"
+}
 
-echo ""
-echo "--- Proof Witnesses ---"
-echo ""
+check_metadata_kind_exists() {
+  local file="$1"
+  local kind="$2"
+  local count
 
-# Extract proof strategies
-grep -A3 'pcf\.proof' server.ll | grep 'strategy:' | while read -r strategy; do
-    echo "  $strategy"
-done
+  count=$(rg -N -c "^![0-9]+ = !\\{!\"pcf\\.${kind}\"" "$file" || true)
+  if [ "${count:-0}" -eq 0 ]; then
+    add_error "$file missing metadata definitions for pcf.${kind}"
+  fi
+}
 
-echo ""
-echo "--- Invariant Summary ---"
-echo ""
+check_metadata_reference_resolution() {
+  local file="$1"
+  local line
 
-# Count various annotation types
-PRE_COUNT=$(grep -c 'pcf\.pre' server.ll || true)
-POST_COUNT=$(grep -c 'pcf\.post' server.ll || true)
-PROOF_COUNT=$(grep -c 'pcf\.proof' server.ll || true)
-INV_COUNT=$(grep -c 'ips\.inv' server.ll || true)
+  while IFS= read -r line; do
+    local fn
+    fn=$(printf '%s\n' "$line" | sed -nE 's/.*@([A-Za-z_][A-Za-z0-9_.]*).*/\1/p')
 
-echo "  Preconditions:  $PRE_COUNT"
-echo "  Postconditions: $POST_COUNT"
-echo "  Proof witnesses: $PROOF_COUNT"
-echo "  IPS invariants: $INV_COUNT"
-echo ""
-
-# Verify all PCFs have complete annotations
-FUNC_COUNT=$(grep -c 'define.*!pcf\.' server.ll || true)
-echo "  Functions with PCF metadata: $FUNC_COUNT"
-echo ""
-
-# Check for completeness
-INCOMPLETE=0
-while IFS= read -r line; do
-    func_name=$(echo "$line" | sed -nE 's/.*(@[A-Za-z_][A-Za-z0-9_.]*).*/\1/p')
-    has_pre=$(echo "$line" | grep -c 'pcf\.pre' || true)
-    has_post=$(echo "$line" | grep -c 'pcf\.post' || true)
-    has_proof=$(echo "$line" | grep -c 'pcf\.proof' || true)
-
-    if [ "$has_pre" -gt 0 ] || [ "$has_post" -gt 0 ] || [ "$has_proof" -gt 0 ]; then
-        if [ "$has_pre" -eq 0 ] || [ "$has_post" -eq 0 ] || [ "$has_proof" -eq 0 ]; then
-            echo "  ⚠ $func_name has incomplete PCF annotations"
-            INCOMPLETE=1
+    local tag
+    for tag in "${required_tags[@]}"; do
+      local id
+      id=$(printf '%s\n' "$line" | sed -nE "s/.*!pcf\\.${tag} !([0-9]+).*/\\1/p")
+      if [ -n "$id" ]; then
+        if ! rg -N -q "^!${id} = " "$file"; then
+          add_error "$file:$fn references missing metadata node !${id} for pcf.${tag}"
         fi
-    fi
-done < <(grep -E 'define .* @' server.ll)
+      fi
+    done
+  done < <(rg -N "^define .*@" "$file")
+}
 
-if [ "$INCOMPLETE" -eq 0 ]; then
-    echo "  ✓ All PCFs have complete annotations (pre + post + proof)"
+check_effect_payloads() {
+  local file="$1"
+  local line
+
+  while IFS= read -r line; do
+    if printf '%s\n' "$line" | rg -q "effect\\.unknown"; then
+      add_error "$file has unresolved effect atom in metadata: $line"
+    fi
+  done < <(rg -N "^![0-9]+ = !\\{!\"pcf\\.effects\"" "$file" || true)
+}
+
+check_module() {
+  local file="$1"
+  shift
+  local funcs=("$@")
+
+  if [ ! -f "$file" ]; then
+    add_error "$file missing"
+    return
+  fi
+
+  local fn
+  for fn in "${funcs[@]}"; do
+    check_required_function "$file" "$fn"
+  done
+
+  local tag
+  for tag in "${required_tags[@]}"; do
+    check_metadata_kind_exists "$file" "$tag"
+  done
+
+  check_metadata_reference_resolution "$file"
+  check_effect_payloads "$file"
+}
+
+check_module "server.ll" \
+  "build_response" "read_file" "get_content_type" "check_invariants" \
+  "load_assets" "handle_client" "main"
+
+check_module "fractal.ll" \
+  "generate_fractal" "get_buffer" "get_buffer_size" "free_buffer"
+
+status="pass"
+if [ "${#errors[@]}" -gt 0 ]; then
+  status="fail"
 fi
 
-echo ""
+timestamp="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+
+{
+  echo "{"
+  echo "  \"status\": \"$status\"," 
+  echo "  \"timestamp\": \"$timestamp\"," 
+  echo "  \"checked_functions\": $checked_functions," 
+  echo "  \"passed_functions\": $passed_functions," 
+  echo "  \"error_count\": ${#errors[@]},"
+  echo "  \"errors\": ["
+
+  if [ "${#errors[@]}" -gt 0 ]; then
+    i=0
+    for err in "${errors[@]}"; do
+      i=$((i + 1))
+      escaped=$(json_escape "$err")
+      if [ "$i" -lt "${#errors[@]}" ]; then
+        echo "    \"$escaped\"," 
+      else
+        echo "    \"$escaped\""
+      fi
+    done
+  fi
+
+  echo "  ]"
+  echo "}"
+} > "$REPORT_JSON"
+
 echo "============================================================================"
-echo " Verification: PASS (static check — SMT discharge requires Z3)"
+echo " LastStack Verification Gate"
 echo "============================================================================"
+cat "$audit_file"
+echo "----------------------------------------------------------------------------"
+echo "status=$status checked_functions=$checked_functions passed_functions=$passed_functions errors=${#errors[@]}"
+echo "report=$REPORT_JSON"
+echo "============================================================================"
+
+rm -f "$audit_file"
+
+if [ "$status" != "pass" ]; then
+  exit 1
+fi

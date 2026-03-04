@@ -56,14 +56,24 @@ CLANG="$(find_tool clang clang-18 clang-17 clang-16 clang-15 clang-14 || true)"
 echo "[LastStack Build] Step 0: Preparing fractal.wasm..."
 mkdir -p public
 if [ -f fractal.ll ] && [ -n "$LLC" ] && [ -n "$WASM_LD" ]; then
-    "$LLC" --march=wasm32 --filetype=obj -O2 fractal.ll -o public/fractal.o 2>&1
-    "$WASM_LD" --no-entry --export-all public/fractal.o -o public/fractal.wasm 2>&1
-    echo "[LastStack Build]   ✓ fractal.wasm built from fractal.ll"
-elif [ -f fractal.ll ] && [ -n "$CLANG" ]; then
-    "$CLANG" -O2 -nostdlib --target=wasm32-unknown-unknown -Wl,--no-entry -Wl,--export-all fractal.ll -o public/fractal.wasm 2>&1
-    echo "[LastStack Build]   ✓ fractal.wasm built via clang wasm32 fallback"
-elif [ -f public/fractal.wasm ]; then
-    echo "[LastStack Build]   ✓ Using existing public/fractal.wasm"
+    if "$LLC" --march=wasm32 --filetype=obj -O2 fractal.ll -o public/fractal.o 2>&1 \
+       && "$WASM_LD" --no-entry --export-all public/fractal.o -o public/fractal.wasm 2>&1; then
+        echo "[LastStack Build]   ✓ fractal.wasm built from fractal.ll"
+    else
+        echo "[LastStack Build]   ⚠ llc/wasm-ld path failed; trying fallback"
+    fi
+fi
+
+if [ ! -f public/fractal.wasm ] && [ -f fractal.ll ] && [ -n "$CLANG" ]; then
+    if "$CLANG" -O2 -nostdlib --target=wasm32-unknown-unknown -Wl,--no-entry -Wl,--export-all fractal.ll -o public/fractal.wasm 2>&1; then
+        echo "[LastStack Build]   ✓ fractal.wasm built via clang wasm32 fallback"
+    else
+        echo "[LastStack Build]   ⚠ clang wasm32 fallback failed"
+    fi
+fi
+
+if [ -f public/fractal.wasm ]; then
+    echo "[LastStack Build]   ✓ Using public/fractal.wasm"
 else
     echo "[LastStack Build]   ✗ Missing fractal.wasm and no WASM build toolchain/source"
     exit 1
@@ -94,13 +104,6 @@ else
     echo "[LastStack Build]   ✓ Built via clang fallback"
 fi
 
-# Report
-echo ""
-echo "[LastStack Build] Build complete!"
-echo "[LastStack Build] Binary: $SCRIPT_DIR/laststack-server"
-echo "[LastStack Build] Size: $(binary_size laststack-server) bytes"
-echo ""
-
 # Step 5: Verify metadata survived optimization
 echo "[LastStack Build] Step 5: Checking PCF metadata survival..."
 if [ -n "$LLVM_DIS" ] && [ -f server-opt.bc ]; then
@@ -116,6 +119,46 @@ else
     echo "[LastStack Build]   ⚠ Skipped (llvm-dis or optimized bitcode unavailable in fallback build)"
 fi
 
+# Step 6: Fail-closed verification gate
+echo ""
+echo "[LastStack Build] Step 6: Running verification gate..."
+bash verify.sh --json verification-report.json
+echo "[LastStack Build]   ✓ Verification report: $SCRIPT_DIR/verification-report.json"
+
+# Step 7: Link gate
+echo ""
+echo "[LastStack Build] Step 7: Running link gate..."
+bash link-gate.sh --verify-report verification-report.json --json link-gate-report.json
+echo "[LastStack Build]   ✓ Link gate report: $SCRIPT_DIR/link-gate-report.json"
+
+# Step 8: Build IPS prototype runtime
+echo ""
+echo "[LastStack Build] Step 8: Building IPS prototype runtime..."
+if [ -f ips-prototype.c ] && [ -n "$CLANG" ]; then
+    "$CLANG" -O2 ips-prototype.c -o laststack-ips 2>&1
+    echo "[LastStack Build]   ✓ Built $SCRIPT_DIR/laststack-ips"
+else
+    echo "[LastStack Build]   ⚠ Skipped (ips-prototype.c or clang unavailable)"
+fi
+
+# Step 9: Artifact seal + TCB capture
+echo ""
+echo "[LastStack Build] Step 9: Sealing artifacts..."
+bash seal-artifacts.sh --verify-report verification-report.json --link-report link-gate-report.json --out artifacts/manifest.json
+echo "[LastStack Build]   ✓ Artifact manifest: $SCRIPT_DIR/artifacts/manifest.json"
+
+# Report
+echo ""
+echo "[LastStack Build] Build complete!"
+echo "[LastStack Build] Binary: $SCRIPT_DIR/laststack-server"
+echo "[LastStack Build] Size: $(binary_size laststack-server) bytes"
+if [ -f laststack-ips ]; then
+    echo "[LastStack Build] IPS Runtime: $SCRIPT_DIR/laststack-ips"
+    echo "[LastStack Build] IPS Size: $(binary_size laststack-ips) bytes"
+fi
+echo ""
+
 echo ""
 echo "[LastStack Build] To run: ./laststack-server"
+echo "[LastStack Build] IPS demo: ./laststack-ips /tmp/ips-state.bin init && ./laststack-ips /tmp/ips-state.bin add 1"
 echo "[LastStack Build] Then visit: http://localhost:9090"

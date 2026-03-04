@@ -1,6 +1,6 @@
 # The Last Stack: Final Architecture for Agent-Native Software
 
-**Version 1.0 - March 2026**
+**Version 1.1 - March 2026**
 
 ## Abstract
 
@@ -88,6 +88,74 @@ Required semantics:
 
 A PCF without complete metadata is non-linkable.
 
+#### 3.1.1 PCF Metadata Schema (Normative, v1)
+
+Each exported PCF MUST provide the following metadata keys:
+- `pcf.schema`: schema identifier string. Required value for this spec: `laststack.pcf.v1`.
+- `pcf.pre`: precondition formula set.
+- `pcf.post`: postcondition formula set, including normal and exceptional exits.
+- `pcf.effects`: effect declaration set.
+- `pcf.bind`: symbol binding table.
+- `pcf.proof`: proof artifact descriptor.
+- `pcf.toolchain`: verifier/checker identity and digest.
+
+Minimal machine-readable payload shape (JSON payload embedded as metadata string):
+
+```json
+{
+  "schema": "laststack.pcf.v1",
+  "function": "module::symbol",
+  "pre": ["(<= x 1024)"],
+  "post": ["(=> normal (= result (+ x 1)))", "(=> exceptional (= errno EOVERFLOW))"],
+  "effects": ["sys.read", "global.write:@counter"],
+  "bind": [{"sym":"x","kind":"arg","ssa":"%x"}],
+  "proof": {"format":"lspc.v1","sha256":"..."},
+  "toolchain": {"checker":"laststack-check 0.1.0","checker_sha256":"..."}
+}
+```
+
+Unknown keys are allowed, but unknown schema versions are a hard verification failure.
+
+#### 3.1.2 Proof Artifact Format (Normative, `lspc.v1`)
+
+Proof artifacts MUST be serialized in a deterministic envelope format:
+- `format`: `lspc.v1`.
+- `goal_hash`: hash of canonicalized verification obligations.
+- `method`: one of `solver-discharge`, `proof-certificate`.
+- `checker`: checker identifier + version.
+- `checker_hash`: checker binary digest.
+- `assumptions`: explicit trusted assumptions (if any).
+- `result`: `sat-proof` or `valid`.
+- `signature` (optional but recommended): detached signature over envelope.
+
+Encoding and hashing rules:
+- Envelope encoding MUST use canonical JSON (RFC 8785 or equivalent deterministic canonicalization).
+- Hash algorithm for `goal_hash` and `checker_hash` is SHA-256 unless verifier profile explicitly overrides it.
+- `goal_hash` is computed over canonicalized obligations plus memory model profile id.
+
+Compatibility policy:
+- A proof is valid only when `goal_hash`, `checker_hash`, and schema version match current verification inputs.
+- Toolchain upgrades invalidate prior proof artifacts unless compatibility is declared in the verifier profile.
+- Missing or stale proofs fail verification; no warning-only mode is allowed on release builds.
+
+#### 3.1.3 `pcf.bind` Semantics (Normative)
+
+`pcf.bind` defines how contract symbols map to program entities:
+- `kind=arg`: direct function argument binding.
+- `kind=ret`: normal return value binding.
+- `kind=mem`: abstract memory region binding.
+- `kind=state`: named persistent object/field binding.
+- `kind=exc`: exceptional exit binding.
+
+Mandatory rules:
+- Every free symbol in `pcf.pre/post` MUST resolve to exactly one `pcf.bind` entry.
+- Bindings MUST be path-total: symbols used in exceptional predicates MUST include an `exc` binding.
+- Memory bindings are region-based, not raw pointer identity. Region identity is `<base-object, offset-range, lifetime>`.
+- `offset-range` uses half-open byte intervals `[start, end)`.
+- `lifetime` must be one of `call`, `function`, or `persistent`.
+- Aliasing is explicit. If two symbols may alias the same region, both entries MUST share an alias group identifier.
+- Unbound symbols, ambiguous bindings, or undeclared alias groups are hard failures.
+
 ### 3.2 Invariant-Preserving Structure (IPS)
 
 An IPS defines durable typed state:
@@ -102,6 +170,35 @@ Mutation rule:
 Recovery rule:
 - On restart, structure must validate checksum/version/invariants before exposure.
 
+#### 3.2.1 IPS Durability Contract (Normative)
+
+Each IPS persistence domain MUST define:
+- `layout_id`: schema/version id.
+- `epoch`: monotonic commit counter.
+- `root_ptr`: pointer or offset to active root.
+- `journal_ptr`: pointer or offset to latest committed journal frame.
+- `domain_checksum`: checksum for metadata page(s).
+
+Each committed mutation frame MUST contain:
+- prior epoch, next epoch,
+- affected region list,
+- redo payload,
+- frame checksum.
+
+Commit protocol (minimum):
+1. Append frame with `prepared` marker and checksum.
+2. Flush frame (`fsync/msync` as configured).
+3. Update root/epoch metadata atomically.
+4. Flush metadata page.
+5. Mark frame `committed`.
+
+Recovery protocol:
+- Scan from last known metadata page.
+- Validate frame checksums and monotonic epoch sequence.
+- Replay only committed frames with valid checksums and contiguous epochs.
+- Stop at first invalid frame and roll back to last valid epoch.
+- Re-check all IPS invariants before exposing state.
+
 ### 3.3 Effect Surface
 
 Effects are part of the contract surface, not comments. At minimum:
@@ -111,6 +208,29 @@ Effects are part of the contract surface, not comments. At minimum:
 - Nondeterministic inputs (clock, random, env).
 
 Effect mismatch between declaration and body is a hard verification failure.
+
+#### 3.3.1 Effect Taxonomy and Normalization (Normative)
+
+Effects are normalized into canonical atoms:
+- `sys.<name>` for direct syscalls.
+- `libc.<name>` for known libc wrappers.
+- `global.read:<symbol>` and `global.write:<symbol>`.
+- `io.net.<op>` and `io.fs.<op>` capability atoms.
+- `nondet.clock`, `nondet.random`, `nondet.env`, `nondet.signal`.
+- `alloc.heap`, `alloc.mmap`, `thread.spawn`, `thread.sync`.
+
+Normalization rules:
+- Wrapper expansion is mandatory: known wrapper calls are translated to underlying effect atoms.
+- Indirect calls require conservative closure: union of callee summaries; if unresolved, add `effect.unknown_call`.
+- Platform mapping tables must map OS-specific syscalls to canonical atoms.
+- Unmappable effects are represented as `effect.unknown:*` and fail release verification.
+
+#### 3.3.2 Effect Matching Rules
+
+Verifier matching uses set inclusion:
+- Actual effect set MUST be a subset of declared effect set.
+- Declared set may be stricter than current implementation but never weaker.
+- Any `effect.unknown:*` atom in actual set is failure unless explicitly permitted by non-release verification profile.
 
 ## 4. Architecture
 
@@ -138,6 +258,23 @@ The canonical pipeline is:
 
 No step is advisory. Failure at any step blocks release artifacts.
 
+#### 4.1.1 Verifier I/O Contract (Normative)
+
+Verifier input bundle MUST include:
+- canonical IR module set digest,
+- PCF metadata bundle digest,
+- verifier profile digest (solver flags, timeout, mode),
+- effect normalization table digest.
+
+Verifier output bundle MUST include:
+- per-function verdict (`valid` or `invalid`),
+- failing obligations list for invalid functions,
+- effect mismatch report,
+- proof artifact references and freshness checks,
+- bundle digest and timestamp.
+
+A linker may consume only verifier outputs whose input bundle digest exactly matches the modules being linked.
+
 ### 4.2 Module Boundary Rules
 
 At every boundary (native module, wasm module, RPC boundary):
@@ -150,6 +287,25 @@ At every boundary (native module, wasm module, RPC boundary):
 Runtime has two modes:
 - **Verified mode**: proof-checked contracts trusted; only boundary assertions remain.
 - **Audit mode**: selected contracts are rechecked at runtime for sampling and drift detection.
+
+### 4.4 Link-Gate Algorithm (Normative)
+
+Linking is performed over interface summaries, not raw symbol names alone.
+
+For each resolved call edge `caller -> callee`:
+1. Check schema compatibility (`pcf.schema` equality or declared compatibility map).
+2. Check caller proof includes callee precondition obligations at callsite.
+3. Check callee postconditions are sufficient for caller continuation assumptions.
+4. Check actual callee effects are subset of effects allowed by caller context.
+5. Check boundary ABI type compatibility and binding compatibility.
+
+Conflict handling:
+- If precondition is not provable at callsite: reject edge.
+- If caller assumes stronger postcondition than callee guarantees: reject edge.
+- If effect policy disallows callee effect atom: reject edge.
+- If multiple implementations satisfy a symbol, choose the unique implementation whose postcondition logically entails all others while still satisfying caller assumptions; if no unique maximal implementation exists, fail ambiguity.
+
+Link output MUST record all accepted edge proofs and rejected edge reasons.
 
 ## 5. Persistence and Recovery Model
 
