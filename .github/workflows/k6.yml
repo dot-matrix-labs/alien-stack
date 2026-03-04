@@ -83,15 +83,6 @@ jobs:
           k6 run --summary-export k6-single.json single.js
           k6 run --summary-export k6-1000.json load1000.js
 
-      - name: Upload k6 summary
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: k6-summary
-          path: |
-            demo/k6-single.json
-            demo/k6-1000.json
-
       - name: Print key metrics
         if: always()
         working-directory: demo
@@ -113,3 +104,37 @@ jobs:
 
           summarize k6-single.json "single"
           summarize k6-1000.json "1000vus"
+
+      - name: Write benchmark.md
+        if: always()
+        run: |
+          DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          SINGLE_RPS=$(jq '.metrics.http_reqs.rate' demo/k6-single.json)
+          SINGLE_P95=$(jq '.metrics.http_req_duration["p(95)"]' demo/k6-single.json)
+          CONC_RPS=$(jq '.metrics.http_reqs.rate' demo/k6-1000.json)
+          CONC_P95=$(jq '.metrics.http_req_duration["p(95)"]' demo/k6-1000.json)
+
+          {
+            echo "# Benchmarks"
+            echo "Run: $DATE"
+            echo ""
+            echo "| scenario | rps | p95_latency_s |"
+            echo "|---|---:|---:|"
+            echo "| single_vu | $SINGLE_RPS | $SINGLE_P95 |"
+            echo "| 1000_vus | $CONC_RPS | $CONC_P95 |"
+            echo ""
+            if [ -f benchmark.md ]; then
+              echo "## Previous runs";
+              cat benchmark.md
+            fi
+          } > benchmark.md
+
+      - name: Upload k6 summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-summary
+          path: |
+            demo/k6-single.json
+            demo/k6-1000.json
+            benchmark.md
