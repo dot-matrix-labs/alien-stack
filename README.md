@@ -6,7 +6,7 @@ This repo is a runnable demo of that philosophy:
 - **Server** (`demo/server.ll`) — HTTP/1.1 server in LLVM IR with PCF-style metadata; serves static assets only.
 - **WASM workload** (`demo/fractal.ll` → `public/fractal.wasm`) — Mandelbrot generator compiled to wasm32.
 - **Client** (`demo/public/index.html`) — minimal HTML/JS: fetches the WASM, calls `generate_fractal`, and blits the returned pixel buffer directly to a `<canvas>`.
-- **Benchmarks** — exercised via conventional k6 scenarios in CI (artifact: `k6-summary/benchmark.md`).
+- **Benchmarks** — exercised via conventional k6 scenarios in CI; results live in `docs/benchmark.md` (also published as artifact `k6-summary/benchmark.md`).
 
 ![Fractal output](docs/fractal-demo.png)
 
@@ -32,8 +32,19 @@ Steps:
 3) **Verify invariants** (lightweight proof checks): `cd demo && ./verify.sh`
 
 ## Benchmarks
-- CI runs k6 against the demo server; results are published as `benchmark.md` (artifact `k6-summary`) with single-VU and 1000-VU RPS/p95 latency. Treat these as the canonical numbers.
-- To reproduce locally, use a stock k6 HTTP script pointing at `http://localhost:9090/` with your chosen VU profile. No custom benchmark binary is included.
+- Latest results: see `docs/benchmark.md` (kept in-repo; CI also publishes the same file as artifact `k6-summary/benchmark.md`). Canonical scenarios: single VU and 1000 VU, reporting RPS and p95 latency.
+- Run locally with any k6 script that hits `http://localhost:9090/`; for example:
+  ```bash
+  k6 run -e TARGET=http://localhost:9090 - <<'EOF'
+  import http from 'k6/http';
+  import { check } from 'k6';
+  export const options = { vus: 1, iterations: 200 };
+  export default () => {
+    const res = http.get(`${__ENV.TARGET || 'http://localhost:9090/'}`);
+    check(res, { 'status 200': r => r.status === 200 });
+  };
+  EOF
+  ```
 
 ## Files to Read First
 - `WHITE_PAPER.md` — motivation, staged roadmap (text → text+structure → IR+proofs).
