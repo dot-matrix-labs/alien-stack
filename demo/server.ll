@@ -19,7 +19,7 @@
 ;   @post        — postcondition (what is true on exit)
 ;   @proof       — proof strategy for correctness
 ;
-; Performance optimizations (see SPEC.md):
+; Performance optimizations (see docs/demo-spec.md):
 ;   1. Asset caching     — files read once at startup into global buffers;
 ;                          complete HTTP responses (header+body) prebuilt.
 ;   2. Zero per-request  — no snprintf, no memset, no open/read/close,

@@ -117,7 +117,7 @@ jobs:
           CONC_RPS=$(jq '.metrics.http_reqs.rate' demo/k6-1000.json)
           CONC_P95=$(jq '.metrics.http_req_duration["p(95)"]' demo/k6-1000.json)
 
-          [ -f benchmark.md ] && cp benchmark.md /tmp/benchmark_prev.md || true
+          [ -f docs/benchmark.md ] && cp docs/benchmark.md /tmp/benchmark_prev.md || true
 
           {
             echo "# Benchmarks"
@@ -128,11 +128,7 @@ jobs:
             echo "| single_vu | $SINGLE_RPS | $SINGLE_P95 |"
             echo "| 1000_vus | $CONC_RPS | $CONC_P95 |"
             echo ""
-            if [ -f /tmp/benchmark_prev.md ]; then
-              echo "## Previous runs";
-              cat /tmp/benchmark_prev.md
-            fi
-          } > benchmark.md
+          } > docs/benchmark.md
 
       - name: Commit benchmark.md
         if: github.ref == 'refs/heads/master'
@@ -142,11 +138,11 @@ jobs:
           set -e
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          if git diff --quiet -- benchmark.md; then
+          if git diff --quiet -- docs/benchmark.md; then
             echo "No benchmark changes to commit."
             exit 0
           fi
-          git add benchmark.md
+          git add docs/benchmark.md
           git commit -m "chore: update benchmark snapshot [skip ci]"
           git push origin HEAD:master
 
@@ -158,4 +154,4 @@ jobs:
           path: |
             demo/k6-single.json
             demo/k6-1000.json
-            benchmark.md
+            docs/benchmark.md

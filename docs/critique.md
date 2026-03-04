@@ -1,6 +1,6 @@
 # LastStack Whitepaper vs Demo Critique
 
-## Paper (WHITE_PAPER.md)
+## Paper (white-paper.md)
 - Strength: Presents an incremental path (Stage 1 annotations → Stage 2 IR-as-source → Stage 3 proofs) that is practical and aligned with LLVM/WASM ecosystems.
 - Strength: Inline `@tag` navigation is well-motivated as zero-infra graph exposure for agent coders.
 - Gaps: Annotation soundness is unspecified (e.g., how `@calls` accounts for indirect calls/varargs/inline asm); proof artifacts have no concrete, checkable format or cost model; persistence story (MFO) omits crash-consistency and recovery guarantees; trust base for the immutable verification layer is not scoped.

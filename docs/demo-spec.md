@@ -63,7 +63,7 @@ An HTTP server written in LLVM IR that serves static files. Extends the current 
 - Request handling uses a single shared 1 KB buffer; only a terminating null byte is written per request (no memset).
 - Hot path is three syscalls per request: `read` → `write` → `close`; no per-request `open/read/close` or `snprintf`.
 - Static 404 response length is precomputed; large per-request stack buffers removed.
-- CI k6 job publishes `benchmark.md` with single-VU and 1000-VU RPS/p95 latency for each run (artifact `k6-summary`).
+- CI k6 job publishes `docs/benchmark.md` with single-VU and 1000-VU RPS/p95 latency for each run (artifact `k6-summary`).
 
 **Metadata annotations:**
 - `@pre` - socket bound, file descriptors valid
@@ -217,7 +217,7 @@ demo/
 ├── src/
 │   ├── fractal.c         # Fractal source
 │   └── fractal.wat       # WASM text format (optional)
-└── SPEC.md               # This file
+└── demo-spec.md               # This file
 ```
 
 ---
