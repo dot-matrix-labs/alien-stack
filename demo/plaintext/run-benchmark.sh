@@ -17,6 +17,12 @@ LOG_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/artifacts"
 mkdir -p "$LOG_DIR"
 RESULT_FILE="$LOG_DIR/${LABEL}-wrk.csv"
 SERVER_LOG="$LOG_DIR/${LABEL}-server.log"
+WRK_CMD="${WRK_CMD:-wrk}"
+
+if ! command -v "$WRK_CMD" >/dev/null 2>&1; then
+  echo "wrk not found: tried '$WRK_CMD'. Install wrk or set WRK_CMD to the binary path." >&2
+  exit 1
+fi
 
 echo "label,concurrency,requests_per_sec,latency_avg" > "$RESULT_FILE"
 
@@ -38,7 +44,7 @@ stop_server() {
 run_wrk() {
   local concurrency=$1
   local output_file="$LOG_DIR/${LABEL}-c${concurrency}.txt"
-  ./wrk -t4 -c${concurrency} -d15s "$TFB_URL" >"$output_file"
+  "$WRK_CMD" -t4 -c${concurrency} -d15s "$TFB_URL" >"$output_file"
   local rps
   local latency
   rps=$(awk '/Requests\/sec/ {print $2}' "$output_file" | tail -n1)
