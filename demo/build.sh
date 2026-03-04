@@ -50,13 +50,18 @@ OPT="$(find_tool opt opt-18 opt-17 opt-16 opt-15 opt-14 || true)"
 LLC="$(find_tool llc llc-18 llc-17 llc-16 llc-15 llc-14 || true)"
 WASM_LD="$(find_tool wasm-ld wasm-ld-18 wasm-ld-17 wasm-ld-16 wasm-ld-15 wasm-ld-14 || true)"
 LLVM_DIS="$(find_tool llvm-dis llvm-dis-18 llvm-dis-17 llvm-dis-16 llvm-dis-15 llvm-dis-14 || true)"
+CLANG="$(find_tool clang clang-18 clang-17 clang-16 clang-15 clang-14 || true)"
 
 # Step 0: Compile fractal.ll to WASM (if tooling/source available), else reuse prebuilt file.
 echo "[LastStack Build] Step 0: Preparing fractal.wasm..."
+mkdir -p public
 if [ -f fractal.ll ] && [ -n "$LLC" ] && [ -n "$WASM_LD" ]; then
     "$LLC" --march=wasm32 --filetype=obj -O2 fractal.ll -o public/fractal.o 2>&1
     "$WASM_LD" --no-entry --export-all public/fractal.o -o public/fractal.wasm 2>&1
     echo "[LastStack Build]   ✓ fractal.wasm built from fractal.ll"
+elif [ -f fractal.ll ] && [ -n "$CLANG" ]; then
+    "$CLANG" -O2 -nostdlib --target=wasm32-unknown-unknown -Wl,--no-entry -Wl,--export-all fractal.ll -o public/fractal.wasm 2>&1
+    echo "[LastStack Build]   ✓ fractal.wasm built via clang wasm32 fallback"
 elif [ -f public/fractal.wasm ]; then
     echo "[LastStack Build]   ✓ Using existing public/fractal.wasm"
 else
