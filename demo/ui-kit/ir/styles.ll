@@ -11,7 +11,7 @@ declare void @set_text(i32 %node, i32 %text_ptr, i32 %text_len)
 
 ; The raw CSS definitions that exactly match the classes used in components.ll
 ; This keeps the styling homomorphically derived from the Wasm module.
-@css_payload = private unnamed_addr constant [738 x i8] c"
+@css_payload = private unnamed_addr constant [1896 x i8] c"
 /* Base/Reset */
 body { background-color: #f9fafb; color: #0f172a; font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \22Segoe UI\22, Roboto, \22Helvetica Neue\22, Arial, sans-serif; display: flex; align-items: center; justify-content: center; padding: 2rem; min-height: 100vh; margin: 0; }
 * { box-sizing: border-box; }
@@ -62,7 +62,7 @@ entry:
   %style_node = call i32 @create_element(i32 %tag_ptr, i32 5)
   
   %css_ptr = ptrtoint ptr @css_payload to i32
-  call void @set_text(i32 %style_node, i32 %css_ptr, i32 738)
+  call void @set_text(i32 %style_node, i32 %css_ptr, i32 1896)
   
   ; Attach to root (handle 1)
   call void @append_child(i32 1, i32 %style_node)

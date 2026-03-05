@@ -17,7 +17,7 @@ declare void @listen(i32 %node, i32 %event_id)
 ; Constants
 @tag_div = private unnamed_addr constant [3 x i8] c"div"
 @tag_h1 = private unnamed_addr constant [2 x i8] c"h1"
-@text_title = private unnamed_addr constant [27 x i8] c"Homomorphic UI Kit Demo     "
+@text_title = private unnamed_addr constant [28 x i8] c"Homomorphic UI Kit Demo     "
 
 declare i32 @create_card()
 declare i32 @create_button(i32 %text_ptr, i32 %text_len)
@@ -30,8 +30,8 @@ declare void @handle_focus(i32 %node)
 declare void @handle_blur(i32 %node)
 
 @text_btn = private unnamed_addr constant [13 x i8] c"Submit Action"
-@text_ph = private unnamed_addr constant [18 x i8] c"Enter your email..."
-@text_lbl = private unnamed_addr constant [14 x i8] c"Email Address"
+@text_ph = private unnamed_addr constant [19 x i8] c"Enter your email..."
+@text_lbl = private unnamed_addr constant [13 x i8] c"Email Address"
 @tag_label = private unnamed_addr constant [5 x i8] c"label"
 
 declare void @inject_ui_css()
@@ -56,7 +56,7 @@ entry:
   %h1_ptr = ptrtoint ptr @tag_h1 to i32
   %title = call i32 @create_element(i32 %h1_ptr, i32 2)
   %title_txt_ptr = ptrtoint ptr @text_title to i32
-  call void @set_text(i32 %title, i32 %title_txt_ptr, i32 27)
+  call void @set_text(i32 %title, i32 %title_txt_ptr, i32 28)
   call void @apply_title_class(i32 %title)
   call void @append_child(i32 %card, i32 %title)
   
@@ -75,7 +75,7 @@ entry:
 
   ; Create and append Input
   %ph_txt_ptr = ptrtoint ptr @text_ph to i32
-  %input = call i32 @create_input(i32 %ph_txt_ptr, i32 18)
+  %input = call i32 @create_input(i32 %ph_txt_ptr, i32 19)
   call void @append_child(i32 %input_wrap, i32 %input)
 
   ; Create and append Button
