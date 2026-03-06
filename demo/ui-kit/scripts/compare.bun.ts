@@ -1,16 +1,26 @@
 // compare.bun.ts - Compare screenshots and DOM
 // Usage: bun run scripts/compare.bun.ts [ref-dir] [dev-dir]
 
-import { existsSync, readFileSync, readdirSync, statSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import path from 'path';
-
-const refDir = process.argv[2] || './captures/reference/card';
-const devDir = process.argv[3] || './captures/dev/card';
 
 interface CompareResult {
   screenshotMatch: boolean;
   domMatch: boolean;
   differences: string[];
+}
+
+const refDir = process.argv[2] || './captures/reference/card';
+const devDir = process.argv[3] || './captures/dev/card';
+
+function extractTags(html: string): string[] {
+  const tags: string[] = [];
+  const regex = /<(\w+)[^>]*>/g;
+  let match;
+  while ((match = regex.exec(html)) !== null) {
+    tags.push(match[1]);
+  }
+  return [...new Set(tags)];
 }
 
 async function compareDirs(ref: string, dev: string): Promise<CompareResult> {
@@ -25,15 +35,15 @@ async function compareDirs(ref: string, dev: string): Promise<CompareResult> {
   const devScreenshot = path.join(dev, 'screenshot.png');
   
   if (existsSync(refScreenshot) && existsSync(devScreenshot)) {
-    const refStat = statSync(refScreenshot);
-    const devStat = statSync(devScreenshot);
+    const refContent = readFileSync(refScreenshot);
+    const devContent = readFileSync(devScreenshot);
     
-    // Size comparison as proxy for content
-    const sizeMatch = refStat.size === devStat.size;
+    // Simple byte comparison
+    const sizeMatch = refContent.length === devContent.length;
     result.screenshotMatch = sizeMatch;
     
     if (!sizeMatch) {
-      result.differences.push(`Screenshot size differs: ref=${refStat.size} vs dev=${devStat.size}`);
+      result.differences.push(`Screenshot size differs: ref=${refContent.length} vs dev=${devContent.length}`);
     }
   } else {
     result.differences.push('Missing screenshot in one or both directories');
@@ -47,30 +57,20 @@ async function compareDirs(ref: string, dev: string): Promise<CompareResult> {
     const refContent = readFileSync(refDom, 'utf-8');
     const devContent = readFileSync(devDom, 'utf-8');
     
-    // Compare DOM structure (simplified)
+    // Compare DOM structure
     const refTags = extractTags(refContent);
     const devTags = extractTags(devContent);
     
     result.domMatch = JSON.stringify(refTags) === JSON.stringify(devTags);
     
     if (!result.domMatch) {
-      result.differences.push(`DOM structure differs: ${JSON.stringify(refTags)} vs ${JSON.stringify(devTags)}`);
+      result.differences.push(`DOM structure differs`);
     }
   } else {
     result.differences.push('Missing DOM dump in one or both directories');
   }
   
   return result;
-}
-
-function extractTags(html: string): string[] {
-  const tags: string[] = [];
-  const regex = /<(\w+)[^>]*>/g;
-  let match;
-  while ((match = regex.exec(html)) !== null) {
-    tags.push(match[1]);
-  }
-  return [...new Set(tags)]; // Unique tags
 }
 
 async function main() {
@@ -100,4 +100,4 @@ async function main() {
   }
 }
 
-main().catch(console.error);
+main();

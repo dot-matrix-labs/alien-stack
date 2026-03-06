@@ -1,10 +1,5 @@
-// serve.bun.js - Static file server using Bun
-// Usage: bun run scripts/serve.bun.js [--port N] [--root DIR]
-//
-// Examples:
-//   bun run scripts/serve.bun.js                    # Serve current dir on 8080
-//   bun run scripts/serve.bun.js --port 8081        # Serve on custom port
-//   bun run scripts/serve.bun.js --root reference   # Serve reference dir
+// serve.bun.ts - Static file server using Bun
+// Usage: bun run scripts/serve.bun.ts [--port N] [--root DIR]
 
 const args = process.argv.slice(2);
 let port = 8080;
@@ -26,14 +21,14 @@ const server = Bun.serve({
   port,
   fetch(req) {
     const url = new URL(req.url);
-    let path = url.pathname;
+    let filePath = url.pathname;
 
-    if (path === '/') path = '/index.html';
+    if (filePath === '/') filePath = '/index.html';
 
-    const filePath = `${root}${path}`;
+    const fullPath = `${root}${filePath}`;
     
     try {
-      const file = Bun.file(filePath);
+      const file = Bun.file(fullPath);
       if (file.exists()) {
         return new Response(file);
       }
@@ -46,3 +41,5 @@ const server = Bun.serve({
 });
 
 console.log(`Server running at http://localhost:${server.port}`);
+
+export {};
