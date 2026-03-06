@@ -25,3 +25,12 @@ demo/webserver/k6-single.json
 demo/webserver/k6-1000.json
 demo/webserver/single.js
 demo/webserver/load1000.js
+
+# Plaintext benchmark outputs
+demo/plaintext/verification-report.json
+demo/plaintext/link-gate-report.json
+demo/plaintext/laststack-plaintext
+demo/plaintext/artifacts/
+
+# Cargo build outputs
+target/
