@@ -4,7 +4,7 @@
 
 ## Abstract
 
-This paper extends the LastStack server-side architecture (see `docs/white-paper.md`, v1.2) to client execution environments. It introduces a **isomorphic client architecture** in which all application policy, layout, and state reside in AI-generated WebAssembly modules, and the browser is treated as a minimal host substrate—a window-system microkernel. This document applies the same empirical, evidence-first methodology and conformance-level model as the server-side specification: claims are grounded in observable repository state, conformance levels are measurement-based rather than aspirational, and hypotheses are falsifiable.
+This paper extends the LastStack server-side architecture (see `docs/white-paper.md`, v1.2) to client execution environments. It introduces a **isomorphic client architecture** in which all application policy, layout, and state reside in AI-generated WebAssembly modules, and the browser is treated as a minimal host substrate—a window-system microkernel. The primary objective is to **completely replace high-level JS frameworks (React, Vue) and CSS frameworks (Bootstrap, Tailwind)** with agent-optimized, proof-carrying IR, achieving extreme tree-shaking for the browser runtime. This document applies the same empirical, evidence-first methodology and conformance-level model as the server-side specification: claims are grounded in observable repository state, conformance levels are measurement-based rather than aspirational, and hypotheses are falsifiable.
 
 The client architecture is a direct extension of the LastStack thesis:
 
@@ -16,13 +16,13 @@ On the client, "canonical behavior is Wasm." The browser exposes a narrow syscal
 
 ## 1. Empirical Baseline (Repository State)
 
-Baseline commit for this assessment: `fbf810c` (`master`, March 4, 2026).
+Baseline commit for this assessment: `d003557` (`demo/ui-kit`, March 8, 2026).
 
 Observed client-relevant facts:
 
-- No client Wasm module presently exists in this repository.
-- No JS shim or browser ABI is implemented.
-- `demo/webserver/` demonstrates the server-side pattern and is the closest analogue: a minimal IR-compiled binary with a narrow, explicitly defined syscall surface.
+- **Isomorphic UI Kit Demo**: A functional client implementation exists in `demo/ui-kit`. It uses LLVM IR (`ir/button.ll`) to generate both UI logic and dynamic CSS, compiled to Wasm.
+- **Inlined JS Shim**: A minimal (<50 lines) browser ABI is implemented directly in `demo/ui-kit/index.html`, instantiating the Wasm module and providing syscalls.
+- **No JS/CSS Frameworks**: The demo successfully renders a interactive UI with zero external dependencies (React, Tailwind, etc.).
 - Structural graph comment infrastructure (`@module`, `@fn`, `@calls`, etc.) and `tools/extract-graph` are the current agent-navigable annotations layer; this infrastructure applies equally to client Wasm as to server IR.
 - CI benchmark reporting is operational and provides the measurement baseline for any performance hypotheses.
 
@@ -65,7 +65,7 @@ No JavaScript framework, virtual DOM, reactive state manager, or macro-expanded 
 
 ### 3.2 Browser as Microkernel
 
-The browser is treated as a **microkernel device**: it owns no policy. It exposes an irreducible set of host primitives via a **JS shim**—a thin (~50 line) driver that:
+The browser is treated as a **microkernel device**: it owns no policy. It exposes an irreducible set of host primitives via a **JS shim**—a thin (<50 line) driver, typically inlined in the host HTML, that:
 
 1. Instantiates the Wasm module.
 2. Exposes a syscall ABI (DOM operations, timing, event forwarding).
@@ -268,7 +268,10 @@ Conformance levels mirror the server-side ladder from `docs/white-paper.md §4`.
 
 A system claims only the highest level whose criteria are fully met.
 
-Current repository state: **CL0 not yet met** (no client Wasm module exists). This is an implementation maturity statement.
+Current repository state: **CL1 (ABI-Compliant)** met by `demo/ui-kit`.
+- CL0 (Structural) met: Wasm/IR source exists.
+- CL1 (ABI-Compliant) met: Imports `laststack.client.abi.v1`, shim is <50 lines inlined in `index.html`.
+- CL2 (Contract Complete) not yet met: IR source (`button.ll`) lacks full PCF metadata blocks.
 
 ---
 
@@ -401,14 +404,16 @@ WebAssembly.instantiateStreaming(fetch('app.wasm'), { env }).then(res => {
 
 ### §A.2 HTML Entry Point
 
-The shim requires a minimal HTML host:
+The shim is typically inlined directly into the host HTML to minimize external requests and simplify the artifact seal:
 
 ```html
 <!DOCTYPE html>
 <html>
 <head><meta charset="UTF-8"></head>
 <body id="root">
-    <script type="module" src="shim.js"></script>
+    <script type="module">
+        // [Inlined shim implementation from §A]
+    </script>
 </body>
 </html>
 ```
