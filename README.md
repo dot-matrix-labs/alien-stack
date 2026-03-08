@@ -30,6 +30,25 @@ This repository demonstrates the feasibility of this architecture through end-to
 
 ---
 
+## Core Concepts
+
+The Alien Stack is built on three pillars that redefine the relationship between agents and code:
+
+### 1. Isomorphic Architecture
+An **isomorphic codebase** means internal program representations (LLVM IR) are directly and verifiably preserved in the deployment artifact (WebAssembly). Unlike traditional web stacks where source code is mangled by transpilers and minifiers, LastStack maintains a 1-to-1 mapping that an AI agent can reason about without a complex, human-centric build pipeline.
+
+### 2. AI-Native Development
+The stack is designed to be **read and written by machines**, prioritizing machine-checkable contracts over human legibility:
+- **Structural Graph**: Code is annotated with tags (`@module`, `@fn`, `@calls`) that allow agents to navigate the system via simple disk searches (like `grep`) rather than a full semantic understanding of a high-level language.
+- **Proof-Carrying Functions (PCF)**: Agents don't just write logic; they write mathematical proofs of behavior (pre/post-conditions, effects). The **Link Gate** in the build pipeline then mechanically verifies these proofs.
+
+### 3. Microkernel Client
+The browser is treated as a **dumb hardware substrate** (device microkernel), not a high-level runtime:
+- **Zero Frameworks**: No React, Vue, or Svelte. All application policy, layout, and even **dynamic CSS generation** occur inside the Wasm module.
+- **Minimal Host Shim**: A tiny (<50 lines) JavaScript "device driver" provides raw syscalls (`dom_create`, `dom_listen`) to the Wasm module, with zero runtime scheduling or state management.
+
+---
+
 ## Open Research
 
 In the short term, Dot Matrix Labs uses this to improve our understanding of end-to-end Rust-based "supergreenfield" apps (Calypso RS). 
@@ -77,7 +96,7 @@ cd demo/storage
 ./run.sh
 ```
 
-### 4. Homomorphic UI Kit (`demo/ui-kit`)
+### 4. Isomorphic UI Kit (`demo/ui-kit`)
 A demonstration of a feature-rich, interactive UI component library where all logic and styling reside in a Wasm module compiled from LLVM IR. 
 *(See: [README.md](demo/ui-kit/README.md))*
 
