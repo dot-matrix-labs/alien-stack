@@ -1,5 +1,5 @@
 ; ============================================================================
-; LastStack Demo: Post-Human WebServer (optimized)
+; Alien Stack Demo: Post-Human WebServer (optimized)
 ; ============================================================================
 ;
 ; @module   server
@@ -71,7 +71,7 @@ target triple = "x86_64-pc-linux-gnu"
 ; ============================================================================
 
 ; @global html_body (used by @build_response, retained for documentation)
-@html_body = private unnamed_addr constant [338 x i8] c"<!DOCTYPE html><html><head><meta charset=\22utf-8\22><title>LastStack</title><style>body{background:#0a0a0a;color:#00ff41;font-family:monospace;display:flex;justify-content:center;align-items:center;height:100vh;margin:0}h1{font-size:3em;text-shadow:0 0 20px #00ff41}</style></head><body><h1>LastStack: Post-Human Software</h1></body></html>\00"
+@html_body = private unnamed_addr constant [342 x i8] c"<!DOCTYPE html><html><head><meta charset=\22utf-8\22><title>Alien Stack</title><style>body{background:#0a0a0a;color:#00ff41;font-family:monospace;display:flex;justify-content:center;align-items:center;height:100vh;margin:0}h1{font-size:3em;text-shadow:0 0 20px #00ff41}</style></head><body><h1>Alien Stack: Post-Human Software</h1></body></html>\00"
 @http_status           = private unnamed_addr constant [18 x i8]  c"HTTP/1.1 200 OK\0D\0A\00"
 @http_content_type     = private unnamed_addr constant [41 x i8]  c"Content-Type: text/html; charset=utf-8\0D\0A\00"
 @http_content_length   = private unnamed_addr constant [17 x i8]  c"Content-Length: \00"
@@ -80,11 +80,11 @@ target triple = "x86_64-pc-linux-gnu"
 @content_length_str    = private unnamed_addr constant [4  x i8]  c"337\00"
 
 ; @global server messages
-@msg_start        = private unnamed_addr constant [46 x i8] c"[LastStack] Server listening on port 9090...\0A\00"
-@msg_error_socket = private unnamed_addr constant [35 x i8] c"[LastStack] Error: socket failed.\0A\00"
-@msg_error_bind   = private unnamed_addr constant [33 x i8] c"[LastStack] Error: bind failed.\0A\00"
-@msg_error_listen = private unnamed_addr constant [35 x i8] c"[LastStack] Error: listen failed.\0A\00"
-@msg_invariant_ok = private unnamed_addr constant [51 x i8] c"[LastStack] Invariant check: all invariants hold.\0A\00"
+@msg_start        = private unnamed_addr constant [48 x i8] c"[Alien Stack] Server listening on port 9090...\0A\00"
+@msg_error_socket = private unnamed_addr constant [37 x i8] c"[Alien Stack] Error: socket failed.\0A\00"
+@msg_error_bind   = private unnamed_addr constant [35 x i8] c"[Alien Stack] Error: bind failed.\0A\00"
+@msg_error_listen = private unnamed_addr constant [37 x i8] c"[Alien Stack] Error: listen failed.\0A\00"
+@msg_invariant_ok = private unnamed_addr constant [53 x i8] c"[Alien Stack] Invariant check: all invariants hold.\0A\00"
 
 ; @global file paths
 @path_index = private unnamed_addr constant [20 x i8] c"./public/index.html\00"
@@ -160,8 +160,8 @@ target triple = "x86_64-pc-linux-gnu"
 @file_load_buf = global [262144 x i8] zeroinitializer, align 16
 
 ; Startup messages
-@msg_load_ok   = private unnamed_addr constant [28 x i8] c"[LastStack] Assets loaded.\0A\00"
-@msg_load_fail = private unnamed_addr constant [39 x i8] c"[LastStack] Error: asset load failed.\0A\00"
+@msg_load_ok   = private unnamed_addr constant [30 x i8] c"[Alien Stack] Assets loaded.\0A\00"
+@msg_load_fail = private unnamed_addr constant [41 x i8] c"[Alien Stack] Error: asset load failed.\0A\00"
 
 ; ============================================================================
 ; External declarations (libc / POSIX)
@@ -737,10 +737,10 @@ declare void @llvm.memset.p0i8.i64(i8* nocapture writeonly, i8, i64, i1 immarg)
         !"exit_code->ret,sockfd->state:%sockfd"}
 
 !36 = !{!"pcf.schema",
-        !"laststack.pcf.v1"}
+        !"alienstack.pcf.v1"}
 
 !37 = !{!"pcf.toolchain",
-        !"checker:laststack-verify-gate",
+        !"checker:alienstack-verify-gate",
         !"version:0.1.0",
         !"hash:dev"}
 

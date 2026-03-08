@@ -162,12 +162,8 @@ check_module() {
   check_effect_payloads "$file"
 }
 
-check_module "server.ll" \
-  "build_response" "read_file" "get_content_type" "check_invariants" \
-  "load_assets" "handle_client" "main"
-
-check_module "fractal.ll" \
-  "generate_fractal" "get_buffer" "get_buffer_size" "free_buffer"
+check_module "plaintext.ll" \
+  "respond_plaintext" "handle_client" "main"
 
 status="pass"
 if [ "${#errors[@]}" -gt 0 ]; then

@@ -1,8 +1,8 @@
 #!/bin/bash
 # ============================================================================
-# LastStack Demo: IPS Evidence Gate
+# Alien Stack Demo: IPS Evidence Gate
 # ============================================================================
-# Runs a deterministic scenario against laststack-ips and emits a JSON report.
+# Runs a deterministic scenario against alienstack-ips and emits a JSON report.
 #
 # Exit codes:
 #   0 = evidence pass
@@ -14,7 +14,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
-IPS_BIN="./laststack-ips"
+IPS_BIN="./alienstack-ips"
 REPORT_JSON="ips-report.json"
 
 while [ $# -gt 0 ]; do
@@ -72,13 +72,13 @@ run_expect_failure() {
 
   checks_total=$((checks_total + 1))
 
-  if "$@" >/tmp/laststack-ips-fail.$$ 2>&1; then
+  if "$@" >/tmp/alienstack-ips-fail.$$ 2>&1; then
     local out
-    out=$(cat /tmp/laststack-ips-fail.$$)
-    rm -f /tmp/laststack-ips-fail.$$
+    out=$(cat /tmp/alienstack-ips-fail.$$)
+    rm -f /tmp/alienstack-ips-fail.$$
     add_error "$name: expected failure but command succeeded; output: $out"
   else
-    rm -f /tmp/laststack-ips-fail.$$ || true
+    rm -f /tmp/alienstack-ips-fail.$$ || true
     checks_passed=$((checks_passed + 1))
   fi
 }
@@ -87,7 +87,7 @@ if [ ! -x "$IPS_BIN" ]; then
   add_error "missing executable IPS binary: $IPS_BIN"
 fi
 
-tmp_dir="$(mktemp -d /tmp/laststack-ips-evidence.XXXXXX)"
+tmp_dir="$(mktemp -d /tmp/alienstack-ips-evidence.XXXXXX)"
 trap 'rm -rf "$tmp_dir"' EXIT
 state_path="$tmp_dir/state.bin"
 
@@ -138,7 +138,7 @@ timestamp="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 } > "$REPORT_JSON"
 
 echo "============================================================================"
-echo " LastStack IPS Evidence"
+echo " Alien Stack IPS Evidence"
 echo "============================================================================"
 echo "status=$status checks_total=$checks_total checks_passed=$checks_passed errors=${#errors[@]}"
 echo "report=$REPORT_JSON"

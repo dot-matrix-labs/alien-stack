@@ -58,7 +58,7 @@ else
   fi
 fi
 
-gated_fns="build_response read_file get_content_type check_invariants load_assets handle_client main generate_fractal get_buffer get_buffer_size free_buffer"
+gated_fns="respond_plaintext handle_client main"
 
 is_gated() {
   case " $gated_fns " in
@@ -130,7 +130,7 @@ collect_edges() {
   ' "$file" | sort -u
 }
 
-for file in server.ll fractal.ll; do
+for file in plaintext.ll; do
   while IFS= read -r edge; do
     [ -z "$edge" ] && continue
     caller="${edge%% *}"
