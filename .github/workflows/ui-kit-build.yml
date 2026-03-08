@@ -1,0 +1,36 @@
+name: UI Kit Build Test
+
+on:
+  push:
+    branches:
+      - demo/ui-kit
+  pull_request:
+    branches:
+      - demo/ui-kit
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install LLVM and Clang
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-18 llvm-18 lld-18
+
+      - name: Run UI Kit Build
+        run: |
+          chmod +x demo/ui-kit/build.sh
+          # Set CLANG_CMD to clang-18 for the script
+          export CLANG_CMD=clang-18
+          ./demo/ui-kit/build.sh
+
+      - name: Verify Artifact
+        run: |
+          if [ ! -f demo/ui-kit/app.wasm ]; then
+            echo "Error: app.wasm was not generated"
+            exit 1
+          fi
+          echo "Build successful: app.wasm exists"
