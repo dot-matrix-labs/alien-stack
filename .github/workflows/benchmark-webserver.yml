@@ -1,6 +1,10 @@
 name: benchmark-webserver
 
 on:
+  push:
+    branches: [master, ci/demo-verification]
+  pull_request:
+    branches: [master]
   schedule:
     - cron: '30 2 * * *' # Nightly at 02:30 UTC
   workflow_dispatch:

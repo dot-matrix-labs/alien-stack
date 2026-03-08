@@ -1,6 +1,10 @@
 name: benchmark-plaintext
 
 on:
+  push:
+    branches: [master, ci/demo-verification]
+  pull_request:
+    branches: [master]
   schedule:
     - cron: '0 2 * * *' # Nightly at 02:00 UTC
   workflow_dispatch:
