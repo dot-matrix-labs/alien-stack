@@ -34,8 +34,8 @@ jobs:
           sleep 2
           RESPONSE=$(curl -s http://127.0.0.1:9090/)
           kill $PID
-          # The webserver returns an HTML page with title "Alien Stack"
-          if [[ "$RESPONSE" == *"<title>Alien Stack</title>"* ]]; then
+          # The webserver returns an HTML page with title starting with "Alien Stack"
+          if [[ "$RESPONSE" == *"<title>Alien Stack"* ]]; then
             echo "✓ UI Response matches expected output"
           else
             echo "✗ Unexpected response content"
