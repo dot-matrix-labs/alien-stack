@@ -1,4 +1,4 @@
-name: UI Kit Build Test
+name: ui-kit-build
 
 on:
   push:
