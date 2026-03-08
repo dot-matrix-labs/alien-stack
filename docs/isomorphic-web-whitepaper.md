@@ -4,7 +4,7 @@
 
 ## Abstract
 
-This paper extends the LastStack server-side architecture (see `docs/white-paper.md`, v1.2) to client execution environments. It introduces a **isomorphic client architecture** in which all application policy, layout, and state reside in AI-generated WebAssembly modules, and the browser is treated as a minimal host substrate—a window-system microkernel. The primary objective is to **completely replace high-level JS frameworks (React, Vue) and CSS frameworks (Bootstrap, Tailwind)** with agent-optimized, proof-carrying IR, achieving extreme tree-shaking for the browser runtime. This document applies the same empirical, evidence-first methodology and conformance-level model as the server-side specification: claims are grounded in observable repository state, conformance levels are measurement-based rather than aspirational, and hypotheses are falsifiable.
+This paper extends the LastStack server-side architecture (see `docs/alien-stack-whitepaper.md`, v1.2) to client execution environments. It introduces a **isomorphic client architecture** in which all application policy, layout, and state reside in AI-generated WebAssembly modules, and the browser is treated as a minimal host substrate—a window-system microkernel. The primary objective is to **completely replace high-level JS frameworks (React, Vue) and CSS frameworks (Bootstrap, Tailwind)** with agent-optimized, proof-carrying IR, achieving extreme tree-shaking for the browser runtime. This document applies the same empirical, evidence-first methodology and conformance-level model as the server-side specification: claims are grounded in observable repository state, conformance levels are measurement-based rather than aspirational, and hypotheses are falsifiable.
 
 The client architecture is a direct extension of the LastStack thesis:
 
@@ -26,7 +26,7 @@ Observed client-relevant facts:
 - Structural graph comment infrastructure (`@module`, `@fn`, `@calls`, etc.) and `tools/extract-graph` are the current agent-navigable annotations layer; this infrastructure applies equally to client Wasm as to server IR.
 - CI benchmark reporting is operational and provides the measurement baseline for any performance hypotheses.
 
-This paper does not claim client implementation exists. It specifies what a conformant client implementation must contain and provides a conformance-level ladder analogous to the one defined in `docs/white-paper.md`.
+This paper does not claim client implementation exists. It specifies what a conformant client implementation must contain and provides a conformance-level ladder analogous to the one defined in `docs/alien-stack-whitepaper.md`.
 
 ---
 
@@ -316,11 +316,11 @@ A unified build could compile from a single LLVM IR source to both a server bina
 
 ## 9. Current Status Against This Spec
 
-At baseline `fbf810c`:
+At baseline `d003557` (March 8, 2026):
 
-- **Meets:** Nothing. No client Wasm module, shim, or ABI exists.
-- **Partially meets:** PCF schema (`laststack.pcf.v1`) and artifact seal (`laststack.artifact.v1`) infrastructure from the server side can be reused directly; they are not client-specific.
-- **Does not meet:** CL0 through CL4 (client).
+- **Meets**: CL0 (Structural) and CL1 (ABI-Compliant). Functional UI Kit demo in `demo/ui-kit` uses only the defined ABI and an inlined shim.
+- **Partially meets**: PCF schema (`laststack.pcf.v1`) and artifact seal (`laststack.artifact.v1`) infrastructure from the server side can be reused directly.
+- **Does not meet**: CL2 through CL4 (contract verification and sealing).
 
 This is an implementation maturity statement. The specification is ready; the implementation does not yet exist.
 

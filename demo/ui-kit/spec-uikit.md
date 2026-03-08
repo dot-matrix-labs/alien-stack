@@ -4,7 +4,7 @@ This document defines the requirements, constraints, and architecture for the Is
 
 ## 1. Goal
 
-Create a demonstration of a feature-rich, interactive UI component library that provides modern, premium aesthetics (similar to Tailwind CSS), but operates under the strict constraints of the LastStack client architecture (`docs/white-paper-client.md`). The objective is to **completely replace high-level JS frameworks (React, etc.) and CSS frameworks (Bootstrap, Tailwind, etc.)** with agent-optimized, proof-carrying IR, resulting in extreme tree-shaking for the browser runtime.
+Create a demonstration of a feature-rich, interactive UI component library that provides modern, premium aesthetics (similar to Tailwind CSS), but operates under the strict constraints of the LastStack client architecture (`docs/isomorphic-web-whitepaper.md`). The objective is to **completely replace high-level JS frameworks (React, etc.) and CSS frameworks (Bootstrap, Tailwind, etc.)** with agent-optimized, proof-carrying IR, resulting in extreme tree-shaking for the browser runtime.
 
 ## 2. Constraints (Non-Negotiable)
 
