@@ -1,4 +1,4 @@
-# The Last Stack: Architecture for Agent-Native Software
+# The Alien Stack: Architecture for Agent-Native Software
 
 **Version 2.0 — March 2026**
 
@@ -10,7 +10,7 @@ Software development has been shaped by human cognitive constraints for seven de
 
 But reexamination does not mean wholesale replacement. Current agent coders — large language models — are themselves text-native. They read text, reason in text, and emit text. Asking them to abandon text for raw IR is like asking a carpenter to work without hands. The transition must be incremental, and every stage must be independently useful.
 
-**LastStack** defines an end-state architecture for software built primarily by coding agents: executable behavior authored in LLVM IR, machine-checkable contracts attached to every exported function, structural graph annotations navigable with grep, and release artifacts gated by formal verification. Text remains the agent-facing interface. Formal contracts create higher assurances for software that is built and run without human intervention — not by replacing tests, but by raising the floor of correctness that tests validate against. The build succeeds only when contracts are discharged, effects are declared, and artifacts are reproducible.
+**Alien Stack** defines an end-state architecture for software built primarily by coding agents: executable behavior authored in LLVM IR, machine-checkable contracts attached to every exported function, structural graph annotations navigable with grep, and release artifacts gated by formal verification. Text remains the agent-facing interface. Formal contracts create higher assurances for software that is built and run without human intervention — not by replacing tests, but by raising the floor of correctness that tests validate against. The build succeeds only when contracts are discharged, effects are declared, and artifacts are reproducible.
 
 This paper specifies the architecture, the rationale behind it, and a concrete path from today's text-only codebases to the fully verified target.
 
@@ -61,13 +61,13 @@ The architecture is designed for current LLM-based agents, not hypothetical futu
 - Agents cannot reliably mount a full external knowledge graph as native working memory; they reconstruct task-specific graphs from code each session.
 - Agents need explicit semantics (contracts, effects, invariants) attached to code to reduce ambiguity and search cost.
 
-This is why LastStack uses LLVM IR as canonical behavior while keeping a text representation (`.ll`) as the agent-facing interface — not a proprietary binary format, not AST-as-source, but semantically rich text with machine-checkable metadata. It fits how agents actually work today.
+This is why Alien Stack uses LLVM IR as canonical behavior while keeping a text representation (`.ll`) as the agent-facing interface — not a proprietary binary format, not AST-as-source, but semantically rich text with machine-checkable metadata. It fits how agents actually work today.
 
 ---
 
 ## 2. Design Principles
 
-LastStack is defined by six rules:
+Alien Stack is defined by six rules:
 
 1. **One canonical representation.**
    LLVM IR is the only authoritative source representation for executable behavior.
@@ -187,7 +187,7 @@ Five greps. Complete system understanding. No sidecar, no database, no tooling.
 
 ### 4.1 Proof-Carrying Function (PCF)
 
-The atomic unit of code in LastStack is the **Proof-Carrying Function**: an LLVM IR function bundled with its specification and a machine-checkable proof.
+The atomic unit of code in Alien Stack is the **Proof-Carrying Function**: an LLVM IR function bundled with its specification and a machine-checkable proof.
 
 ```llvm
 ; PCF: safe_add — adds two i32 values with overflow protection
@@ -213,7 +213,7 @@ Every exported PCF must include:
 
 | Metadata Key | Purpose |
 |-------------|---------|
-| `pcf.schema` | Schema identifier (`laststack.pcf.v1`) |
+| `pcf.schema` | Schema identifier (`alienstack.pcf.v1`) |
 | `pcf.pre` | Entry assumptions |
 | `pcf.post` | Guarantees on normal and exceptional exits |
 | `pcf.effects` | Exhaustive side-effect declaration |
@@ -251,7 +251,7 @@ Proof validity requires matching `goal_hash`, schema version, and checker digest
 
 ### 4.2 Invariant-Preserving Structure (IPS)
 
-Data structures in LastStack are **Invariant-Preserving Structures**: typed binary layouts with embedded contracts. An IPS consists of:
+Data structures in Alien Stack are **Invariant-Preserving Structures**: typed binary layouts with embedded contracts. An IPS consists of:
 
 | Component | Description |
 |-----------|-------------|
@@ -377,7 +377,7 @@ TCB scope: LLVM toolchain components, verifier/checker binaries, linker/sealing 
 
 ### 5.7 Tool Mapping
 
-| LastStack Component | Existing Tool | Role |
+| Alien Stack Component | Existing Tool | Role |
 |---------------------|---------------|------|
 | Structural graph annotations | grep / `tools/extract-graph` | Call graph, data flow, CFG traversal via @tags |
 | IR representation | LLVM 14+ | Code storage, optimization, compilation |
@@ -477,7 +477,7 @@ The role shifts from "programmer" to "specifier" — from writing instructions t
 
 ## 10. Non-Goals
 
-LastStack does not optimize for:
+Alien Stack does not optimize for:
 - Human-oriented syntax ergonomics as a primary concern.
 - Framework-level abstraction layers with implicit side effects.
 - Test-only correctness claims without contract/proof linkage.
@@ -486,7 +486,7 @@ LastStack does not optimize for:
 
 ## 11. Definition of Done
 
-A system qualifies as LastStack-compliant when:
+A system qualifies as Alien Stack-compliant when:
 - Executable behavior is authored and versioned as LLVM IR modules.
 - Exported behavior is expressed as complete PCFs.
 - Verification is mandatory at link time.
@@ -500,7 +500,7 @@ A system qualifies as LastStack-compliant when:
 
 The last stack humans build should be the one that makes human-built stacks unnecessary. But it won't be built in a single leap.
 
-Agents today think in text — and that's fine. The mistake would be either ignoring that fact or treating it as permanent. LastStack starts where agents already are: reading text files, using grep, writing comments. Structural graph annotations require no tooling at all. Add `@calls`, `@called-by`, `@reads`, `@inv` comments to your code files. Agents grep them. That's it. The graph *is* the code.
+Agents today think in text — and that's fine. The mistake would be either ignoring that fact or treating it as permanent. Alien Stack starts where agents already are: reading text files, using grep, writing comments. Structural graph annotations require no tooling at all. Add `@calls`, `@called-by`, `@reads`, `@inv` comments to your code files. Agents grep them. That's it. The graph *is* the code.
 
 From there, the architecture deepens: LLVM IR as canonical source, formal contracts on every export, proof-carrying linkage, effect validation, and ultimately self-modifying agents that optimize their own verified code at runtime.
 

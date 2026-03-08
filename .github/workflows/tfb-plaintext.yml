@@ -37,7 +37,7 @@ jobs:
       - name: Run LLVM plaintext workload
         working-directory: demo/plaintext
         run: |
-          bash run-benchmark.sh llvmir ./laststack-plaintext
+          bash run-benchmark.sh llvmir ./alienstack-plaintext
 
       - name: Dump LLVM artifacts
         if: always()
@@ -50,7 +50,7 @@ jobs:
       - name: Run Hyper baseline workload
         working-directory: demo/plaintext
         run: |
-          bash run-benchmark.sh hyper 8081 hyper/target/release/laststack_plaintext_hyper
+          bash run-benchmark.sh hyper 8081 hyper/target/release/alienstack_plaintext_hyper
 
       - name: Dump Hyper artifacts
         if: always()

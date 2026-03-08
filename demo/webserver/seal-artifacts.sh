@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================================
-# LastStack Webserver Demo: Artifact Sealing
+# Alien Stack Webserver Demo: Artifact Sealing
 # ============================================================================
 # Emits a manifest with content digests, verification outputs, and scoped
 # TCB tool records for reproducibility and audit.
@@ -110,7 +110,7 @@ tools=("bash" "clang" "llvm-as" "opt" "llc" "wasm-ld" "z3" "cvc5" "jq")
 
 {
   echo "{"
-  echo "  \"schema\": \"laststack.artifact.v1\"," 
+  echo "  \"schema\": \"alienstack.artifact.v1\"," 
   echo "  \"timestamp\": \"$timestamp\"," 
   echo "  \"git_commit\": \"$commit_sha\"," 
   echo "  \"artifacts\": {"
@@ -118,7 +118,7 @@ tools=("bash" "clang" "llvm-as" "opt" "llc" "wasm-ld" "z3" "cvc5" "jq")
   record_file_json "fractal_ll" "fractal.ll"; echo ","
   record_file_json "index_html" "public/index.html"; echo ","
   record_file_json "fractal_wasm" "public/fractal.wasm"; echo ","
-  record_file_json "server_bin" "laststack-server"; echo ","
+  record_file_json "server_bin" "alienstack-server"; echo ","
   record_file_json "verify_report" "$VERIFY_REPORT"; echo ","
   record_file_json "link_report" "$LINK_REPORT"; echo ""
   echo "  },"

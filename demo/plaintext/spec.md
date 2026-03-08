@@ -11,7 +11,7 @@ Deliver a handwritten LLVM IR HTTP server that satisfies the TechEmpower Framewo
 - Verification (`verify.sh`) and link gate (`link-gate.sh`) must enforce metadata coverage.
 
 ## Build pipeline
-- `clang` compiles `plaintext.ll` to `laststack-plaintext` with `-O2`.
+- `clang` compiles `plaintext.ll` to `alienstack-plaintext` with `-O2`.
 - `build.sh` runs the verification and link gates to fail closed if metadata is missing.
 - `run.sh` builds and executes the server on the configured port.
 

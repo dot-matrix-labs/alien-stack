@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================================
-# LastStack Webserver Demo: Build Pipeline
+# Alien Stack Webserver Demo: Build Pipeline
 # ============================================================================
 # Compiles LLVM IR -> optimized IR -> native binary and runs webserver gates.
 # ============================================================================
@@ -84,13 +84,13 @@ if [ -n "$LLVM_AS" ] && [ -n "$OPT" ] && [ -n "$LLC" ]; then
     echo "[Webserver Build]   ✓ Native object generated"
 
     echo "[Webserver Build] Step 4: Linking executable..."
-    "$CLANG" server.o -o laststack-server 2>&1
+    "$CLANG" server.o -o alienstack-server 2>&1
     echo "[Webserver Build]   ✓ Executable linked"
 else
     # Portable fallback when standalone LLVM tools are not installed.
     echo "[Webserver Build] Step 1: LLVM toolchain not fully available; using clang fallback..."
     "$CLANG" -c server.ll -o server.o 2>&1
-    "$CLANG" server.o -o laststack-server 2>&1
+    "$CLANG" server.o -o alienstack-server 2>&1
     echo "[Webserver Build]   ✓ Built via clang fallback"
 fi
 
@@ -130,10 +130,10 @@ echo "[Webserver Build]   ✓ Artifact manifest: $SCRIPT_DIR/artifacts/manifest.
 # Report
 echo ""
 echo "[Webserver Build] Build complete!"
-echo "[Webserver Build] Binary: $SCRIPT_DIR/laststack-server"
-echo "[Webserver Build] Size: $(binary_size laststack-server) bytes"
+echo "[Webserver Build] Binary: $SCRIPT_DIR/alienstack-server"
+echo "[Webserver Build] Size: $(binary_size alienstack-server) bytes"
 echo ""
 
 echo ""
-echo "[Webserver Build] To run: ./laststack-server"
+echo "[Webserver Build] To run: ./alienstack-server"
 echo "[Webserver Build] Then visit: http://localhost:9090"

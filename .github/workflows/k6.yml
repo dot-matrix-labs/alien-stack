@@ -37,9 +37,9 @@ jobs:
           TARGET_URL: http://127.0.0.1:9090/
         run: |
           # start server in background
-          ./laststack-server >/tmp/laststack-server.log 2>&1 &
-          echo $! > /tmp/laststack-server.pid
-          trap 'kill $(cat /tmp/laststack-server.pid) 2>/dev/null || true; echo "--- laststack-server.log ---"; cat /tmp/laststack-server.log || true' EXIT
+          ./alienstack-server >/tmp/alienstack-server.log 2>&1 &
+          echo $! > /tmp/alienstack-server.pid
+          trap 'kill $(cat /tmp/alienstack-server.pid) 2>/dev/null || true; echo "--- alienstack-server.log ---"; cat /tmp/alienstack-server.log || true' EXIT
           sleep 2
 
           cat > single.js <<'EOF'

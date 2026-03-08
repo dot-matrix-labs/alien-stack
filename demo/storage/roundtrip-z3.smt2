@@ -1,5 +1,5 @@
 ; ============================================================================
-; LastStack: IPS round-trip and commit-isolation proofs
+; Alien Stack: IPS round-trip and commit-isolation proofs
 ; ============================================================================
 ;
 ; Two separate proof obligations:

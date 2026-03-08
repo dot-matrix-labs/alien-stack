@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================================
-# LastStack Demo: Verification Gate (fail-closed)
+# Alien Stack Demo: Verification Gate (fail-closed)
 # ============================================================================
 # Verifies that required functions carry complete PCF metadata and that
 # metadata references resolve to concrete metadata nodes.
@@ -39,7 +39,7 @@ errors=()
 checked_functions=0
 passed_functions=0
 
-audit_file="/tmp/laststack-verify.$$.txt"
+audit_file="/tmp/alienstack-verify.$$.txt"
 : > "$audit_file"
 
 add_error() {
@@ -199,7 +199,7 @@ timestamp="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 } > "$REPORT_JSON"
 
 echo "============================================================================"
-echo " LastStack Verification Gate"
+echo " Alien Stack Verification Gate"
 echo "============================================================================"
 cat "$audit_file"
 echo "----------------------------------------------------------------------------"

@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================================
-# LastStack Storage Demo: Build Pipeline
+# Alien Stack Storage Demo: Build Pipeline
 # ============================================================================
 # Compiles IPS LLVM IR to a native binary and runs the IPS evidence gate.
 # ============================================================================
@@ -47,12 +47,12 @@ if [ ! -f ips.ll ]; then
 fi
 
 echo "[Storage Build] Step 1: Building IPS runtime..."
-"$CLANG" -O2 ips.ll -o laststack-ips 2>&1
-echo "[Storage Build]   ✓ Built $SCRIPT_DIR/laststack-ips"
+"$CLANG" -O2 ips.ll -o alienstack-ips 2>&1
+echo "[Storage Build]   ✓ Built $SCRIPT_DIR/alienstack-ips"
 
 echo ""
 echo "[Storage Build] Step 2: Running IPS evidence gate..."
-bash ips-evidence.sh --bin ./laststack-ips --json ips-report.json
+bash ips-evidence.sh --bin ./alienstack-ips --json ips-report.json
 echo "[Storage Build]   ✓ IPS report: $SCRIPT_DIR/ips-report.json"
 
 echo ""
@@ -70,12 +70,12 @@ echo "[Storage Build]   ✓ Effect lint report: $SCRIPT_DIR/effect-lint-report.j
 
 echo ""
 echo "[Storage Build] Build complete!"
-echo "[Storage Build] Binary: $SCRIPT_DIR/laststack-ips"
-echo "[Storage Build] Size: $(binary_size laststack-ips) bytes"
+echo "[Storage Build] Binary: $SCRIPT_DIR/alienstack-ips"
+echo "[Storage Build] Size: $(binary_size alienstack-ips) bytes"
 echo "[Storage Build] Verification artifacts:"
 echo "[Storage Build]   ips-report.json        — IPS evidence (7 behavioral checks)"
 echo "[Storage Build]   pcf-proof-report.json  — Z3 proof discharge (2 SMT-LIB obligations)"
 echo "[Storage Build]   effect-lint-report.json — structural effect lint"
 
 echo ""
-echo "[Storage Build] Demo: ./laststack-ips /tmp/ips-state.bin init && ./laststack-ips /tmp/ips-state.bin add 1 && ./laststack-ips /tmp/ips-state.bin recover"
+echo "[Storage Build] Demo: ./alienstack-ips /tmp/ips-state.bin init && ./alienstack-ips /tmp/ips-state.bin add 1 && ./alienstack-ips /tmp/ips-state.bin recover"

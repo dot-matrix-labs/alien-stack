@@ -1,5 +1,5 @@
 ; ============================================================================
-; LastStack: checksum_for — PCF postcondition discharge
+; Alien Stack: checksum_for — PCF postcondition discharge
 ; ============================================================================
 ;
 ; GOAL: Prove that the implementation of checksum_for (transcribed from

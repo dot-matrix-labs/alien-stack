@@ -1,5 +1,5 @@
 ; =============================================================================
-; LastStack Demo: Plaintext LLVM-IR Server
+; Alien Stack Demo: Plaintext LLVM-IR Server
 ; =============================================================================
 ; Minimal single-threaded TCP server responding with constant plaintext payload.
 ; Designed to mirror TechEmpower plaintext test expectations.
@@ -122,5 +122,5 @@ handle_client_block:
 !14 = !{!"pcf.effects", !"libc.socket,libc.setsockopt,libc.bind,libc.listen,libc.accept,libc.close,libc.htons"}
 !15 = !{!"pcf.bind", !"ret->exit_code"}
 
-!30 = !{!"pcf.schema", !"laststack.pcf.v1"}
+!30 = !{!"pcf.schema", !"alienstack.pcf.v1"}
 !31 = !{!"pcf.toolchain", !"checker:tfb-plaintext"}
