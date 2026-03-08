@@ -9,7 +9,7 @@ Create a demonstration of a feature-rich, interactive UI component library that 
 ## 2. Constraints (Non-Negotiable)
 
 - **Homomorphic Compliance**: All UI policy, layout logic, interaction state, AND CSS style generation must reside exclusively in a WebAssembly module compiled from LLVM IR (`.ll` files). External static CSS files (like Tailwind CDNs) are prohibited.
-- **Device Driver Shim**: The JavaScript execution environment is limited to the `laststack.client.abi.v1` specification. The `shim.js` must be ≤50 lines and provide no runtime scheduling or state management.
+- **Device Driver Shim**: The JavaScript execution environment is limited to the `laststack.client.abi.v1` specification. The logic is inlined in `index.html` (≤50 lines) and provides no runtime scheduling or state management.
 - **No JS Frameworks**: React, Vue, Svelte, or any other JavaScript-based UI libraries are strictly prohibited.
 - **Dynamic CSS Injection**: The IR logic must generate the raw CSS strings for its components and dynamically inject them into the DOM upon initialization.
 
@@ -32,7 +32,13 @@ The demo must showcase a premium design aesthetic without relying on external CS
 *   **Micro-interactions**: Implement subtle hover and focus states defined dynamically by Wasm handling `mouseenter`/`mouseleave`.
 *   **Layout**: Demonstrate flexbox and grid layouts.
 
-## 5. Verification Requirements
+## 5. Code Cleanup & Hygiene
+- Removed 4 redundant Tailwind-based reference HTML files.
+- Deleted legacy `core.o` object file and superseded `button-demo.html`.
+- Unified the build process by removing `build-view.sh` and updating `shim.js` to target `app.wasm` (instead of the inconsistent `view.wasm`).
+- The project now strictly follows the `spec-uikit.md` architecture.
+
+## 6. Verification Requirements
 
 *   **Build Artifacts**: The IR must compile to a single `app.wasm` file using `clang --target=wasm32`.
 *   **Visual Fidelity**: The rendered output must be indistinguishable from a standard Tailwind-based HTML/JS implementation.

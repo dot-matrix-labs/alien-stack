@@ -6,6 +6,7 @@ This repository now has two separate demos:
 - `demo/plaintext` - A naive LLVM IR HTTP plaintext server to compare to a naive Rust Warp server.
 - `demo/webserver` - LLVM IR HTTP server + WASM fractal webpage.
 - `demo/storage` - LLVM IR IPS durability and recovery runtime.
+- `demo/ui-kit` - Homomorphic UI Kit (LLVM IR to Wasm styling and logic).
 
 ### Naive Plaintext results
 In a benchmark similar to TFB here's the comparison. Note this is the Agent's first pass at both frameworks.
