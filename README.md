@@ -1,5 +1,9 @@
 # Alien Stack 
 
+![Plaintext](https://github.com/dot-matrix-labs/alien-stack/actions/workflows/demo-plaintext.yml/badge.svg)
+![Webserver](https://github.com/dot-matrix-labs/alien-stack/actions/workflows/demo-webserver.yml/badge.svg)
+![Storage](https://github.com/dot-matrix-labs/alien-stack/actions/workflows/demo-storage.yml/badge.svg)
+
 ## Why
 
 We set out to find if, in Q1 2026, agents could write superhuman code. There is an opportunity for software to take a quantum leap: software which is proven to be correct, tree-shaken, and free to self-improve unconstrained by human patterns or the tools they depend on.

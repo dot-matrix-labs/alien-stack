@@ -1,16 +1,13 @@
-name: tfb-plaintext
+name: benchmark-plaintext
 
 on:
-  push:
-    branches: [tfb-plaintext-llvmir]
+  schedule:
+    - cron: '27 5 * * *' # Nightly at 05:27 UTC
   workflow_dispatch:
 
 jobs:
   benchmark:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -39,26 +36,10 @@ jobs:
         run: |
           bash run-benchmark.sh llvmir ./alienstack-plaintext
 
-      - name: Dump LLVM artifacts
-        if: always()
-        working-directory: demo/plaintext
-        run: |
-          ls -al artifacts || true
-          cat artifacts/llvmir-server.log || true
-          tail -n 40 artifacts/benchmark-summary.md || true
-
       - name: Run Hyper baseline workload
         working-directory: demo/plaintext
         run: |
           bash run-benchmark.sh hyper 8081 hyper/target/release/alienstack_plaintext_hyper
-
-      - name: Dump Hyper artifacts
-        if: always()
-        working-directory: demo/plaintext
-        run: |
-          ls -al artifacts || true
-          cat artifacts/hyper-server.log || true
-          tail -n 40 artifacts/benchmark-summary.md || true
 
       - name: Show benchmark summaries
         working-directory: demo/plaintext/artifacts
@@ -68,8 +49,8 @@ jobs:
             cat "$file"
           done
 
-      - name: Upload benchmark artifacts
+      - name: Upload benchmark results
         uses: actions/upload-artifact@v4
         with:
-          name: tfb-plaintext-results
+          name: plaintext-benchmark-results
           path: demo/plaintext/artifacts/
