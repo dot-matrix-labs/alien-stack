@@ -1,8 +1,8 @@
 #!/bin/bash
 # =============================================================================
-# LastStack Plaintext Demo: Build pipeline
+# Alien Stack Plaintext Demo: Build pipeline
 # =============================================================================
-# Compiles plaintext LLVM IR -> native binary and runs LastStack verification gates.
+# Compiles plaintext LLVM IR -> native binary and runs Alien Stack verification gates.
 # =============================================================================
 
 set -euo pipefail
@@ -47,8 +47,8 @@ if [ ! -f plaintext.ll ]; then
 fi
 
 echo "[Plaintext Build] Step 1: Compiling plaintext server"
-"$CLANG" -O2 plaintext.ll -o laststack-plaintext
-echo "[Plaintext Build]   ✓ Binary: $SCRIPT_DIR/laststack-plaintext"
+"$CLANG" -O2 plaintext.ll -o alienstack-plaintext
+echo "[Plaintext Build]   ✓ Binary: $SCRIPT_DIR/alienstack-plaintext"
 
 echo
 bash verify.sh --json verification-report.json
@@ -56,4 +56,4 @@ bash link-gate.sh --verify-report verification-report.json --json link-gate-repo
 
 echo
 echo "[Plaintext Build] Build complete!"
-echo "[Plaintext Build] Binary size: $(binary_size laststack-plaintext) bytes"
+echo "[Plaintext Build] Binary size: $(binary_size alienstack-plaintext) bytes"

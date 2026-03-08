@@ -1,5 +1,5 @@
 ; ============================================================================
-; LastStack Demo: Fractal Generator (LLVM IR, no C source)
+; Alien Stack Demo: Fractal Generator (LLVM IR, no C source)
 ; ============================================================================
 ;
 ; @module   fractal
@@ -317,8 +317,8 @@ entry:
            qed"}
 !119 = !{!"pcf.effects", !"global.read:none,global.write:none"}
 !120 = !{!"pcf.bind", !"ptr->arg:%ptr"}
-!121 = !{!"pcf.schema", !"laststack.pcf.v1"}
+!121 = !{!"pcf.schema", !"alienstack.pcf.v1"}
 !122 = !{!"pcf.toolchain",
-         !"checker:laststack-verify-gate",
+         !"checker:alienstack-verify-gate",
          !"version:0.1.0",
          !"hash:dev"}

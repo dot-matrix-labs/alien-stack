@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================================
-# LastStack Demo: Structural Effect Lint
+# Alien Stack Demo: Structural Effect Lint
 # ============================================================================
 # Addresses critique W5: validates that each function's declared !pcf.effects
 # matches the actual libc/syscall calls present in its IR body.
@@ -284,7 +284,7 @@ timestamp="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 } > "$REPORT_JSON"
 
 echo "============================================================================"
-echo " LastStack Structural Effect Lint"
+echo " Alien Stack Structural Effect Lint"
 echo "============================================================================"
 echo "status=$overall functions_total=$total_fns functions_passed=$pass_fns errors=${#errors[@]} warnings=${#warnings[@]}"
 echo "report=$REPORT_JSON"

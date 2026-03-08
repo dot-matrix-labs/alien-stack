@@ -1,4 +1,4 @@
-# The Last Stack: A Post-Human Software Development Architecture
+# The Alien Stack: A Post-Human Software Development Architecture
 
 **Version 0.2 — March 2026**
 
@@ -10,7 +10,7 @@ Software development has been shaped by human cognitive constraints for seven de
 
 But reexamination does not mean wholesale replacement. Current agent coders — large language models — are themselves text-native. They read text, reason in text, and emit text. Asking them to abandon text for raw IR is like asking a carpenter to work without hands. The transition must be incremental.
 
-This paper presents **LastStack** — a software development architecture designed for agent coders, built in stages. The near-term stage augments text-based source code with **structural sidecars**: queryable graph and tree representations (call graphs, ASTs, type maps, scope references) that give agents the structural reasoning they currently reconstruct from scratch on every turn. The long-term stage replaces text entirely with typed intermediate representations, formal verification, and persistent memory-native structures.
+This paper presents **Alien Stack** — a software development architecture designed for agent coders, built in stages. The near-term stage augments text-based source code with **structural sidecars**: queryable graph and tree representations (call graphs, ASTs, type maps, scope references) that give agents the structural reasoning they currently reconstruct from scratch on every turn. The long-term stage replaces text entirely with typed intermediate representations, formal verification, and persistent memory-native structures.
 
 The result is an evolution path — from text-only, to text-with-structure, to structure-with-text-as-view, to pure IR — where every step is independently useful and every function eventually carries its own proof of correctness.
 
@@ -52,7 +52,7 @@ The solution is not to take text away from agents. It is to give them structure 
 
 ### 1.3 Design Goals
 
-LastStack is designed around six principles:
+Alien Stack is designed around six principles:
 
 - **Incrementally adoptable.** Each layer of the stack provides value independently. An agent using structural sidecars today benefits immediately, without waiting for formal verification or IR-native tooling.
 
@@ -72,7 +72,7 @@ LastStack is designed around six principles:
 
 ### 2.1 The Proof-Carrying Function (PCF)
 
-The atomic unit of code in LastStack is the **Proof-Carrying Function**: an LLVM IR function bundled with:
+The atomic unit of code in Alien Stack is the **Proof-Carrying Function**: an LLVM IR function bundled with:
 
 - **A specification** (preconditions, postconditions, frame conditions) encoded as SMT-LIB assertions in function metadata.
 - **A proof witness** (a certificate that the function body satisfies the specification) encoded as a verifiable artifact.
@@ -102,7 +102,7 @@ The proof witness is not a textual label — in a production system it would be 
 
 ### 2.2 Invariant-Preserving Structures (IPS)
 
-Data structures in LastStack are **Invariant-Preserving Structures**: typed binary layouts with embedded contracts.
+Data structures in Alien Stack are **Invariant-Preserving Structures**: typed binary layouts with embedded contracts.
 
 An IPS consists of:
 
@@ -150,7 +150,7 @@ The agent coder never "saves" or "loads" data. Data is always live, always typed
 
 ### 2.4 SSA/LLVM IR as the Native Language
 
-LLVM IR in SSA form is the native language of LastStack. There is no "source language." Agents:
+LLVM IR in SSA form is the native language of Alien Stack. There is no "source language." Agents:
 
 - **Generate** IR directly from specifications.
 - **Optimize** IR using LLVM's pass infrastructure plus custom invariant-aware passes.
@@ -158,7 +158,7 @@ LLVM IR in SSA form is the native language of LastStack. There is no "source lan
 - **Link** IR modules after verifying proof compatibility at module boundaries.
 - **Emit** WASM (or native code) from verified IR.
 
-The key insight: LLVM IR is already the lingua franca of compilation. LastStack simply removes the layers above it that exist only for human convenience.
+The key insight: LLVM IR is already the lingua franca of compilation. Alien Stack simply removes the layers above it that exist only for human convenience.
 
 ---
 
@@ -297,7 +297,7 @@ The annotation convention and LLVM metadata serve different purposes:
 | **Machine-checked?** | No (lint only) | Yes (solver-discharged) |
 | **Cost to add** | Zero (just comments) | Requires metadata node design |
 
-Both encode graph structure. The doc comments encode the *navigation* graph (who calls whom, who reads what). The metadata encodes the *correctness* graph (what must be true, why it's true). A complete LastStack module has both.
+Both encode graph structure. The doc comments encode the *navigation* graph (who calls whom, who reads what). The metadata encodes the *correctness* graph (what must be true, why it's true). A complete Alien Stack module has both.
 
 ---
 
@@ -317,7 +317,7 @@ Stage 1 (near-term):  text files with inline graph annotations
 Stage 2 (mid-term):   LLVM IR as source of truth + annotations + metadata
                       agents operate on IR directly, grep for navigation
                       ↓
-Stage 3 (long-term):  full LastStack (IR + proofs + invariants + metadata)
+Stage 3 (long-term):  full Alien Stack (IR + proofs + invariants + metadata)
                       formal verification replaces testing
 ```
 
@@ -393,7 +393,7 @@ The annotation layer embeds structural navigation directly in source files as st
 
 No external tooling is required. Agents traverse the graph using grep — the tool they already have. The annotations are invisible to the compiler (LLVM IR comments are discarded by the assembler) and co-located with the code they describe, eliminating sync drift.
 
-The annotation layer is the **entry point** to LastStack. It can be applied to any codebase today, in any language that supports comments.
+The annotation layer is the **entry point** to Alien Stack. It can be applied to any codebase today, in any language that supports comments.
 
 #### Agent Layer
 
@@ -449,7 +449,7 @@ Even with formal verification, testing serves a purpose: it validates that speci
 
 ### 4.4 Tool Mapping
 
-| LastStack Component | Existing Tool | Role |
+| Alien Stack Component | Existing Tool | Role |
 |---------------------|---------------|------|
 | Inline graph annotations | grep / any text search | Call graph, data flow, CFG traversal via @tags |
 | Annotation linting | custom LLVM pass | Cross-check @calls against actual call instructions |
@@ -704,7 +704,7 @@ The role shifts from "programmer" to "specifier" — from writing instructions t
 
 The last stack humans build should be the one that makes human-built stacks unnecessary. But it won't be built in a single leap. Agents today think in text — and that's fine. The mistake would be either ignoring that fact or treating it as permanent.
 
-LastStack is a blueprint for an incremental transition. Stage 1 — inline graph annotations — requires no tooling at all. Add `@calls`, `@called-by`, `@reads`, `@invariant` comments to your code files. Agents grep them. That's it. The graph is in the code. The code is the graph.
+Alien Stack is a blueprint for an incremental transition. Stage 1 — inline graph annotations — requires no tooling at all. Add `@calls`, `@called-by`, `@reads`, `@invariant` comments to your code files. Agents grep them. That's it. The graph is in the code. The code is the graph.
 
 Stage 2 moves the source of truth from human-language source to LLVM IR, with annotations and metadata carrying the structure. Stage 3 adds formal verification, proof-carrying functions, and invariant-preserving data structures. Each stage is independently useful. You don't need to believe in the long-term vision to benefit from structured comments today.
 
@@ -712,7 +712,7 @@ The demo accompanying this paper — a webserver written as LLVM IR with inline 
 
 The tools exist today. Grep exists. LLVM IR is mature. SMT solvers are fast. WASM runtimes are production-grade. What remains is convention: agreeing on the tags, writing them consistently, and building the habit of treating comments as navigable structure rather than prose.
 
-This is the last stack. It starts with a comment.
+This is the Alien Stack. It starts with a comment.
 
 ---
 

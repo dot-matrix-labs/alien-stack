@@ -1,5 +1,5 @@
 ; ============================================================================
-; LastStack Demo: IPS Runtime (LLVM IR)
+; Alien Stack Demo: IPS Runtime (LLVM IR)
 ; ============================================================================
 ; Minimal durable-state runtime used by the IPS evidence gate.
 ; Commands:
@@ -880,9 +880,9 @@ attributes #2 = { argmemonly nofree nounwind willreturn }
 ; PCF Metadata Definitions
 ; ============================================================================
 
-!100 = !{!"pcf.schema", !"laststack.pcf.v1"}
+!100 = !{!"pcf.schema", !"alienstack.pcf.v1"}
 !101 = !{!"pcf.toolchain",
-         !"checker:laststack-verify-gate",
+         !"checker:alienstack-verify-gate",
          !"version:0.1.0",
          !"hash:dev"}
 

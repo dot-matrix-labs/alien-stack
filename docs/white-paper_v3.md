@@ -1,10 +1,10 @@
-# The Last Stack: Final Architecture for Agent-Native Software
+# The Alien Stack: Final Architecture for Agent-Native Software
 
 **Version 1.1 - March 2026**
 
 ## Abstract
 
-LastStack defines a single end-state architecture for software built primarily by coding agents. The core claim is simple: source, verification, and deployment should all operate on one machine-native representation, LLVM IR, with proofs attached to every exported behavior. Text is documentation, not authority. Build success means contracts are discharged, effects are declared, and artifacts are reproducible. This document specifies that final architecture directly, including trust boundaries, runtime model, and proof requirements.
+Alien Stack defines a single end-state architecture for software built primarily by coding agents. The core claim is simple: source, verification, and deployment should all operate on one machine-native representation, LLVM IR, with proofs attached to every exported behavior. Text is documentation, not authority. Build success means contracts are discharged, effects are declared, and artifacts are reproducible. This document specifies that final architecture directly, including trust boundaries, runtime model, and proof requirements.
 
 ## 1. Problem Statement
 
@@ -20,7 +20,7 @@ For agent-driven implementation, this creates recurring failure modes:
 - Drift between documentation, code, and verification artifacts.
 - High verification cost paid late in the cycle.
 
-LastStack removes these mismatches by making verification and structure first-class properties of the build graph.
+Alien Stack removes these mismatches by making verification and structure first-class properties of the build graph.
 
 ### 1.1 Agent Interface Constraints (Today)
 
@@ -30,7 +30,7 @@ The architecture is designed for current LLM-based agents, not hypothetical futu
 - Agents cannot reliably "mount" a full external knowledge graph as native working memory; they reconstruct task-specific graphs from code each session.
 - Agents need explicit semantics (contracts, effects, invariants) attached to code to reduce ambiguity and search cost.
 
-This is why LastStack does not introduce a new proprietary binary source format or AST-as-canonical-source model:
+This is why Alien Stack does not introduce a new proprietary binary source format or AST-as-canonical-source model:
 - A binary source format is opaque to current language models and weak for review, diff, and patch workflows.
 - AST dumps still require parser/tooling mediation and often hide low-level execution semantics that matter for verification and codegen.
 - Current models operate in language order; giving them semantically rich text/IR with machine-checkable metadata fits how they actually work.
@@ -39,7 +39,7 @@ So the final architecture uses LLVM IR as canonical behavior, while keeping a te
 
 ## 2. Final Philosophy
 
-LastStack is defined by six rules:
+Alien Stack is defined by six rules:
 
 1. **One canonical representation.**
    LLVM IR is the only authoritative source representation for executable behavior.
@@ -91,7 +91,7 @@ A PCF without complete metadata is non-linkable.
 #### 3.1.1 PCF Metadata Schema (Normative, v1)
 
 Each exported PCF MUST provide the following metadata keys:
-- `pcf.schema`: schema identifier string. Required value for this spec: `laststack.pcf.v1`.
+- `pcf.schema`: schema identifier string. Required value for this spec: `alienstack.pcf.v1`.
 - `pcf.pre`: precondition formula set.
 - `pcf.post`: postcondition formula set, including normal and exceptional exits.
 - `pcf.effects`: effect declaration set.
@@ -103,14 +103,14 @@ Minimal machine-readable payload shape (JSON payload embedded as metadata string
 
 ```json
 {
-  "schema": "laststack.pcf.v1",
+  "schema": "alienstack.pcf.v1",
   "function": "module::symbol",
   "pre": ["(<= x 1024)"],
   "post": ["(=> normal (= result (+ x 1)))", "(=> exceptional (= errno EOVERFLOW))"],
   "effects": ["sys.read", "global.write:@counter"],
   "bind": [{"sym":"x","kind":"arg","ssa":"%x"}],
   "proof": {"format":"lspc.v1","sha256":"..."},
-  "toolchain": {"checker":"laststack-check 0.1.0","checker_sha256":"..."}
+  "toolchain": {"checker":"alienstack-check 0.1.0","checker_sha256":"..."}
 }
 ```
 
@@ -309,7 +309,7 @@ Link output MUST record all accepted edge proofs and rejected edge reasons.
 
 ## 5. Persistence and Recovery Model
 
-LastStack persistence uses typed binary objects with explicit durability protocol:
+Alien Stack persistence uses typed binary objects with explicit durability protocol:
 - Copy-on-write or journaled mutation records.
 - Checksummed pages/segments.
 - Monotonic version stamps.
@@ -367,14 +367,14 @@ What remains to fully meet this architecture spec:
 
 ## 9. Non-Goals
 
-LastStack does not optimize for:
+Alien Stack does not optimize for:
 - Human-oriented syntax ergonomics as a primary concern.
 - Framework-level abstraction layers with implicit side effects.
 - Test-only correctness claims without contract/proof linkage.
 
-## 10. Definition of Done for LastStack Systems
+## 10. Definition of Done for Alien Stack Systems
 
-A system qualifies as LastStack-compliant when:
+A system qualifies as Alien Stack-compliant when:
 - Executable behavior is authored and versioned as LLVM IR modules.
 - Exported behavior is expressed as complete PCFs.
 - Verification is mandatory at link time.

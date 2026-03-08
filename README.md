@@ -1,4 +1,4 @@
-# LastStack: Why Alien?
+# Alien Stack: Why Alien?
 
 We set out to find if, in Q1 2026, agents could write superhuman code. There is an opportunity for software to take a quantum leap: software which is proven to be correct, tree-shaken, and free to self-improve unconstrained by human patterns or the tools they depend on.
 
@@ -22,9 +22,9 @@ Long term, we're curious whether there is a graph representation of the code whi
 
 ---
 
-# LastStack
+# Alien Stack
 
-LastStack is an architecture for **agent-native software development**, described in detail in the [LastStack Whitepaper](docs/white-paper.md). It's intentionally alien.
+Alien Stack is an architecture for **agent-native software development**, described in detail in the [Alien Stack Whitepaper](docs/white-paper.md). It's intentionally alien.
 
 The paper imagines a future where humans stop writing text-based source code to accommodate human cognitive constraints, and instead direct agent coders to generate and optimize **Proof-Carrying Functions (PCFs)** directly in LLVM IR. Text becomes a view for documentation and structural navigation, while the machine-checkable contracts, invariants, and effects become the authoritative interface.
 
@@ -99,7 +99,7 @@ In an automated CI benchmark reflecting the TFB plaintext profile (using `wrk` o
 
 ## Verification and Automation
 
-LastStack enforces its contracts via **Verification and Link Gates**. In the demos (e.g., `demo/plaintext/build.sh`), compilation will **fail closed** if the required PCF metadata (`!pcf.pre`, `!pcf.effects`, etc.) is missing, invalid, or mismatches the code.
+Alien Stack enforces its contracts via **Verification and Link Gates**. In the demos (e.g., `demo/plaintext/build.sh`), compilation will **fail closed** if the required PCF metadata (`!pcf.pre`, `!pcf.effects`, etc.) is missing, invalid, or mismatches the code.
 
 CI jobs automatically track compliance and record latency snapshots (artifacts) to prevent regressions on steady-state and saturation loads.
 
@@ -107,5 +107,5 @@ CI jobs automatically track compliance and record latency snapshots (artifacts) 
 
 ## Further Reading
 
-- [LastStack Whitepaper](docs/white-paper.md) (The core architecture)
+- [Alien Stack Whitepaper](docs/white-paper.md) (The core architecture)
 - [Architecture Critique](docs/critique.md)

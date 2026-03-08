@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================================
-# LastStack Demo: Link Gate (fail-closed)
+# Alien Stack Demo: Link Gate (fail-closed)
 # ============================================================================
 # Consumes verifier output and enforces basic interface compatibility on
 # internal call edges across gate-controlled functions.
@@ -194,7 +194,7 @@ timestamp="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 } > "$LINK_REPORT"
 
 echo "============================================================================"
-echo " LastStack Link Gate"
+echo " Alien Stack Link Gate"
 echo "============================================================================"
 echo "status=$status accepted_edges=$accepted rejected_edges=$rejected errors=${#errors[@]}"
 echo "report=$LINK_REPORT"

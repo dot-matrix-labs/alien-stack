@@ -1,10 +1,10 @@
-# Mock Peer Review: "The Last Stack — Architecture for Agent-Native Software" (v2.0)
+# Mock Peer Review: "The Alien Stack — Architecture for Agent-Native Software" (v2.0)
 
 ---
 
 ## Summary
 
-This paper proposes **LastStack**, an end-state architecture for software authored by LLM-based coding agents rather than human programmers. The central thesis is that agent coders should operate on LLVM IR with machine-checkable contracts (Proof-Carrying Functions), structural graph annotations navigable via grep, effect declarations, and formal verification gates at link time. The paper provides a taxonomy of conformance levels, a scientific evaluation plan with five falsifiable hypotheses, and three working demonstrations: an HTTP webserver, a TechEmpower plaintext benchmark server, and a storage durability demo.
+This paper proposes **Alien Stack**, an end-state architecture for software authored by LLM-based coding agents rather than human programmers. The central thesis is that agent coders should operate on LLVM IR with machine-checkable contracts (Proof-Carrying Functions), structural graph annotations navigable via grep, effect declarations, and formal verification gates at link time. The paper provides a taxonomy of conformance levels, a scientific evaluation plan with five falsifiable hypotheses, and three working demonstrations: an HTTP webserver, a TechEmpower plaintext benchmark server, and a storage durability demo.
 
 The paper tackles a relevant and timely problem — the mismatch between human-centric software tooling and the emerging reality of agent-authored code. The core insight that agents need *structure alongside text* rather than replacing text wholesale is well-motivated and practically grounded.
 

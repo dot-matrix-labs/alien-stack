@@ -1,10 +1,10 @@
-# The Last Stack: Reconciled Architecture for Agent-Native Software
+# The Alien Stack: Reconciled Architecture for Agent-Native Software
 
 **Version 1.2 - March 2026**
 
 ## Abstract
 
-LastStack targets one architecture: executable behavior authored in LLVM IR, machine-checkable contracts attached to exported behavior, and release artifacts gated by verification. This revision reconciles two active lines of work in this repository:
+Alien Stack targets one architecture: executable behavior authored in LLVM IR, machine-checkable contracts attached to exported behavior, and release artifacts gated by verification. This revision reconciles two active lines of work in this repository:
 - Structural graph comments and extraction tooling now present on `master`.
 - Formal verification semantics (effects, bindings, proof artifacts, link gate, artifact sealing) proposed in parallel.
 
@@ -28,7 +28,7 @@ This baseline is the evidence foundation for the architecture below.
 
 ## 2. Reconciled Thesis
 
-LastStack is defined by four non-negotiable constraints:
+Alien Stack is defined by four non-negotiable constraints:
 
 1. **Canonical behavior is LLVM IR.**
    Runtime semantics are defined by `.ll` modules and their compiled artifacts.
@@ -61,7 +61,7 @@ Structural invariants:
 ### 3.2 Contract Layer (Required for Compliance)
 
 Every exported PCF must include:
-- `pcf.schema` (required: `laststack.pcf.v1`)
+- `pcf.schema` (required: `alienstack.pcf.v1`)
 - `pcf.pre`
 - `pcf.post`
 - `pcf.effects`
@@ -195,7 +195,7 @@ This is an implementation maturity statement, not a philosophy change.
 
 ## 7. Definition of Done
 
-A LastStack-compliant release must satisfy all of:
+A Alien Stack-compliant release must satisfy all of:
 - Canonical LLVM IR behavior modules.
 - Full PCF coverage on exported/critical interfaces.
 - Fail-closed verifier and link gate in the build path.

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-extract-graph  —  Parse LastStack IR graph comments and emit a JSON graph.
+extract-graph  —  Parse Alien Stack IR graph comments and emit a JSON graph.
 
 Usage:
     extract-graph <file.ll> [<file2.ll> ...]   # full JSON graph

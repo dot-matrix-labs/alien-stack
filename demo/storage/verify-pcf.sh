@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================================
-# LastStack Demo: PCF Solver Discharge Gate
+# Alien Stack Demo: PCF Solver Discharge Gate
 # ============================================================================
 # Invokes Z3 on the SMT-LIB proof obligations for the IPS storage demo.
 # Each obligation must return "unsat" to pass.
@@ -138,7 +138,7 @@ timestamp="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 } > "$REPORT_JSON"
 
 echo "============================================================================"
-echo " LastStack PCF Proof Discharge"
+echo " Alien Stack PCF Proof Discharge"
 echo "============================================================================"
 echo "status=$status proofs_total=$total proofs_passed=$passed"
 echo "report=$REPORT_JSON"
