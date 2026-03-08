@@ -1,3 +1,19 @@
+# LastStack: Why Alien?
+
+We set out to find if, in Q1 2026, agents could write superhuman code. There is an opportunity for software to take a quantum leap: software which is proven to be correct, tree-shaken, and free to self-improve with a lack of dependencies.
+
+Currently, if an agent is asked to build a product, it will do what a junior developer would do: search the internet for prior art, choose libraries written by other humans, set up a development environment, and brute-force the features with write-run loops. Today, it’s widely reported that humans aren't even reviewing agent code that is being shipped to production.
+
+It’s been speculated a super agent might just need binary, and write binary. We set out to find out what was possible; we asked the agent how it would do this, and it came up with **Alien Stack**. We asked it to write a scientific paper about it, then peer-review it by a mock committee, and finally make some demos. These demos are impressive for several reasons:
+1. **Speed**: Created within 15 minutes, without internet searches or build tool struggles.
+2. **Completeness**: Fully specified even for ambitious cases.
+3. **Performance**: Surprisingly performant.
+4. **Efficiency**: Thoroughly tree-shaken, with nothing extraneous.
+
+Why this stack? It’s likely ephemeral because of the current state of agent tools. Agents want to read text files sequentially and discover them via disk searches (like `ripgrep`). We can’t yet feed it a specialized graph binary of a program’s semantics—but that day may soon arrive, and we’ll keep trying.
+
+---
+
 # LastStack
 
 LastStack is an architecture for **agent-native software development**, described in detail in the [LastStack Whitepaper](docs/white-paper.md). It's intentionally alien.
