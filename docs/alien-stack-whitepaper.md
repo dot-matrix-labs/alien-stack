@@ -54,7 +54,33 @@ The cost is measured in context window tokens, latency, and errors. An agent tha
 
 The solution is not to take text away from agents. It is to give them structure *alongside* text.
 
-### 1.3 Agent Interface Constraints (Today)
+---
+
+## 1.3 An Opportunity: Formal Verification for Autonomous Systems
+
+Human-authored code benefits from a human in the loop — bugs can be caught in review, failures can be noticed by operators, and specifications can be debated and refined through discussion. Agent-authored code has none of these.
+
+When agents become the primary authors of software, two things change:
+
+1. **No human in the loop to catch failures.** Autonomous systems run unattended. When bugs manifest, there's no human to notice and intervene. Traditional testing checks a finite number of execution paths; formal verification checks all of them.
+
+2. **Untrusted authorship.** Agent-authored code may contain subtle mistakes that a human reviewer would catch but the agent itself doesn't. Without formal contracts, the only correctness mechanism is example-based testing — which cannot exhaustively cover the state space.
+
+Formal verification is not merely a tooling choice for this architecture — it is a *necessity* for autonomous systems. Contracts create a verifiable interface: each component must prove it satisfies its specification before linking, regardless of whether the author is a human or an agent. The build becomes fail-closed: if a contract cannot be verified, the release is blocked.
+
+This represents an opportunity: the same properties that make agent-authored code risky — lack of human oversight, opaque reasoning — also make formal verification tractable. Agents can emit machine-checkable proofs alongside code because they already work with structured representations. The verification infrastructure becomes the autonomous system's safety net.
+
+Our goal is the full testing pyramid — **unit tests, module tests, and end-to-end tests** — alongside formal verification:
+
+1. **Agents working alone on new features** — Tests and proofs help an agent verify its changes are correct without requiring human review at every step.
+
+2. **Maintaining code and hardening** — Regression tests and invariant proofs catch unintended side effects when modifying existing code.
+
+3. **Deploying systems with no humans in the loop** — Autonomous systems require stronger guarantees than testing alone can provide. Formal verification fills this gap.
+
+LLVM IR gives us the usual testing capabilities (unit tests, integration tests, e2e tests can all be authored in IR). But formal verification requires specialized languages and tools (SMT solvers, proof checkers). This presented an opportunity to introduce proof systems into our stack — the PCF metadata and verification pipeline are exactly that.
+
+### 1.4 Agent Interface Constraints (Today)
 
 The architecture is designed for current LLM-based agents, not hypothetical future models:
 
