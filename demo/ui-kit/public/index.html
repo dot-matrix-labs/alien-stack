@@ -20,6 +20,8 @@
         let memory = null;
         const getStr = (ptr, len) => new TextDecoder('utf-8').decode(new Uint8Array(memory.buffer, ptr, len));
         const events = { 1: 'click', 2: 'input', 3: 'mouseenter', 4: 'mouseleave', 5: 'focus', 6: 'blur' };
+        // host_call dispatch table — fn_id 0: alert, 1: console.log
+        const hostFns = { 0: (s) => window.alert(s), 1: (s) => console.log(s) };
 
         const env = {
             dom_create: (t_ptr, t_len) => {
@@ -41,6 +43,7 @@
                 node.addEventListener(events[event_id], () => wasmExports.on_event(node_handle, event_id));
             },
             dom_remove: (n) => { handles.get(n).remove(); handles.delete(n); },
+            host_call: (fn_id, ptr, len) => { hostFns[fn_id]?.(getStr(ptr, len)); },
             perf_now: () => performance.now(),
             raf_request: (cb_id) => requestAnimationFrame((t) => wasmExports.on_frame(t))
         };

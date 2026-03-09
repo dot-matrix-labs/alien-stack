@@ -35,6 +35,12 @@ const page = await browser.newPage();
 const consoleErrors: string[] = [];
 page.on('pageerror', err => consoleErrors.push(err.message));
 
+let alertMessage: string | null = null;
+page.on('dialog', async dialog => {
+  alertMessage = dialog.message();
+  await dialog.dismiss();
+});
+
 try {
   console.log('\nLoading page...');
   await page.goto(baseUrl, { waitUntil: 'networkidle', timeout: 15000 });
@@ -60,6 +66,15 @@ try {
       pass('Button is visible');
     } else {
       fail('Button is not visible');
+    }
+
+    // Click the button and verify it triggers a window.alert via Wasm on_event
+    await button.click();
+    await page.waitForTimeout(500);
+    if (alertMessage === 'Button clicked') {
+      pass('Button click triggers alert "Button clicked"');
+    } else {
+      fail(`Expected alert "Button clicked" — got: ${alertMessage ?? '(none)'}`);
     }
   }
 

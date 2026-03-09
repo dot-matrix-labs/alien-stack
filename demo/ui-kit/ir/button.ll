@@ -7,9 +7,14 @@ declare i32 @dom_create(i32 %tag_ptr, i32 %tag_len)
 declare void @dom_append(i32 %parent, i32 %child)
 declare void @dom_set_text(i32 %node, i32 %ptr, i32 %len)
 declare void @dom_set_attr(i32 %node, i32 %k_ptr, i32 %k_len, i32 %v_ptr, i32 %v_len)
+declare void @dom_listen(i32 %node, i32 %event_id)
+declare void @host_call(i32 %fn_id, i32 %ptr, i32 %len)
 
 @tag_button = private unnamed_addr constant [6 x i8] c"button"
 @text_submit = private unnamed_addr constant [6 x i8] c"Submit"
+@msg_clicked = private unnamed_addr constant [14 x i8] c"Button clicked"
+
+@button_handle = global i32 0
 
 ; Attribute names
 @attr_bg = private unnamed_addr constant [10 x i8] c"background"
@@ -110,11 +115,24 @@ entry:
   
   ; Append button to body
   call void @dom_append(i32 1, i32 %button)
-  
+
+  ; Store handle and register click listener (event_id 1 = click)
+  store i32 %button, i32* @button_handle
+  call void @dom_listen(i32 %button, i32 1)
+
   ret void
 }
 
 define void @on_event(i32 %node, i32 %event_id) {
 entry:
+  %is_click = icmp eq i32 %event_id, 1
+  br i1 %is_click, label %do_alert, label %done
+
+do_alert:
+  %msg_ptr = call i32 @get_ptr(i8* getelementptr ([14 x i8], [14 x i8]* @msg_clicked, i32 0, i32 0))
+  call void @host_call(i32 0, i32 %msg_ptr, i32 14)
+  br label %done
+
+done:
   ret void
 }
