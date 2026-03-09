@@ -5,7 +5,7 @@ set -e
 
 cd "$(dirname "$0")"
 
-mkdir -p ir
+mkdir -p ir public
 
 # If no .ll files exist, we just exit (for testing script itself)
 if ! ls ir/*.ll 1> /dev/null 2>&1; then
@@ -38,6 +38,6 @@ $CLANG_CMD --target=wasm32-unknown-unknown -nostdlib -O3 \
     -Wl,--export=init \
     -Wl,--export=on_event \
     -Wl,--allow-undefined \
-    ir/*.ll -o app.wasm
+    ir/*.ll -o public/app.wasm
 
-echo "Successfully built Alien Stack app.wasm"
+echo "Successfully built Alien Stack public/app.wasm"

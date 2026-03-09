@@ -3,7 +3,7 @@
 
 const args = process.argv.slice(2);
 let port = 8080;
-let root = '.';
+let root = 'public';
 
 for (let i = 0; i < args.length; i++) {
   if (args[i] === '--port' && args[i + 1]) {

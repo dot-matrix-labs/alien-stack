@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "test": "bun run scripts/test.bun.ts"
+  },
   "dependencies": {},
   "devDependencies": {
     "playwright": "^1.58.2"

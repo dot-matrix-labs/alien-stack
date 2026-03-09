@@ -26,7 +26,7 @@ async function capture() {
       let filePath = url.pathname;
       if (filePath === '/') filePath = '/' + htmlFile;
 
-      const fullPath = process.cwd() + filePath;
+      const fullPath = process.cwd() + '/public' + filePath;
       const file = Bun.file(fullPath);
 
       if (file.exists()) {
