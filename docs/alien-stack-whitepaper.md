@@ -2,6 +2,8 @@
 
 **Version 2.0 — March 2026**
 
+> **Research Paper.** This document is a scientific specification. It defines an architecture, the formal properties it requires, and falsifiable hypotheses for evaluation. The accompanying repository contains proof-of-concept demonstrations that validate the foundational claims. The demos are not production software — they exist to show that the core ideas are technically coherent and implementable. The full architecture (L2–L4 conformance, solver-backed verification, mechanically checked proof certificates) remains future work.
+
 ---
 
 ## Abstract
@@ -10,7 +12,7 @@ Software development has been shaped by human cognitive constraints for seven de
 
 But reexamination does not mean wholesale replacement. Current agent coders — large language models — are themselves text-native. They read text, reason in text, and emit text. Asking them to abandon text for raw IR is like asking a carpenter to work without hands. The transition must be incremental, and every stage must be independently useful.
 
-**Alien Stack** defines an end-state architecture for software built primarily by coding agents: executable behavior authored in LLVM IR, machine-checkable contracts attached to every exported function, structural graph annotations navigable with grep, and release artifacts gated by formal verification. Text remains the agent-facing interface. Formal contracts create higher assurances for software that is built and run without human intervention — not by replacing tests, but by raising the floor of correctness that tests validate against. The build succeeds only when contracts are discharged, effects are declared, and artifacts are reproducible.
+**Alien Stack** proposes an architecture for software built primarily by coding agents: executable behavior authored in LLVM IR, machine-checkable contracts attached to every exported function, structural graph annotations navigable with grep, and release artifacts gated by formal verification. Text remains the agent-facing interface. Formal contracts create higher assurances for software that is built and run without human intervention — not by replacing tests, but by raising the floor of correctness that tests validate against. The build succeeds only when contracts are discharged, effects are declared, and artifacts are reproducible.
 
 This paper specifies the architecture, the rationale behind it, and a concrete path from today's text-only codebases to the fully verified target.
 
@@ -22,7 +24,7 @@ This paper specifies the architecture, the rationale behind it, and a concrete p
 
 Modern software stacks impose five categories of overhead that exist solely to accommodate human cognition:
 
-1. **Parsing overhead.** Source code is text. Text must be lexed, parsed into ASTs, type-checked, lowered to IR, optimized, and emitted as machine code. Each transformation is a potential source of bugs and a barrier to formal reasoning. An agent coder gains nothing from the text representation — it is a detour.
+1. **Parsing overhead.** Source code is text. Text must be lexed, parsed into ASTs, type-checked, lowered to IR, optimized, and emitted as machine code. Each transformation is a potential source of bugs and a barrier to formal reasoning. An agent coder that targets IR directly can skip this pipeline — though it trades the ergonomic benefits of high-level syntax for the verbosity of a lower-level representation.
 
 2. **Semantic ambiguity.** Human languages are ambiguous by design. Programming languages inherit this: operator overloading, implicit conversions, dynamic dispatch, macro expansion. Each feature adds expressiveness for humans at the cost of formal tractability. An agent reasons more effectively over a representation with explicit semantics.
 
@@ -32,7 +34,7 @@ Modern software stacks impose five categories of overhead that exist solely to a
 
 5. **Library indirection.** Human developers use libraries to avoid re-implementing solved problems. But libraries introduce dependency graphs, version conflicts, API surface area, and trust boundaries. In the human-centric model, libraries are essential because no individual can maintain everything — shared maintenance, security patching, and ecosystem coordination require social infrastructure.
 
-   Agent coders change this calculus fundamentally. An agent that is both engineer and compiler can re-derive a patched implementation from a specification faster than it can track upstream changelogs. When the agent can verify the inlined result against a formal contract, the trust boundary that justified the library abstraction dissolves. Libraries remain useful for hardware-specific optimizations and externally mandated interfaces (e.g., TLS compliance), but the default posture shifts from "import a dependency" to "generate a verified implementation."
+   Agent coders may shift this calculus. An agent that can re-derive a patched implementation from a specification and verify the result against a formal contract has less need for the shared-maintenance infrastructure that libraries provide. The trust boundary that justifies a library abstraction shrinks when the agent can author and verify an equivalent inline implementation. Libraries remain appropriate for hardware-specific optimizations, externally mandated interfaces (e.g., TLS compliance), and cases where re-derivation cost exceeds the dependency cost. But the default posture becomes worth questioning.
 
 ### 1.2 The Agent Text Problem
 
@@ -159,7 +161,7 @@ grep "@inv" *.ll
 → every correctness property in the system, with context
 ```
 
-Five greps. Complete system understanding. No sidecar, no database, no tooling.
+Five greps. Structural understanding of the system without reading every file. No sidecar, no database, no additional tooling.
 
 ### 3.4 Why This Works
 
@@ -177,9 +179,7 @@ Five greps. Complete system understanding. No sidecar, no database, no tooling.
 
 - Every declared edge must reference a declared node id.
 - `@calls` and `@called-by` must be logically consistent where both are present.
-- Extracted graph output is deterministic for a fixed file set and parser version.
-
-`tools/extract-graph` is the canonical parser for this layer.
+- Graph traversal is performed directly via grep against the source files. No parser or sidecar tool is required — the annotation convention is self-sufficient.
 
 ---
 
@@ -255,7 +255,7 @@ Data structures in Alien Stack are **Invariant-Preserving Structures**: typed bi
 
 | Component | Description |
 |-----------|-------------|
-| **Layout** | Binary layout schema (FlatBuffers / Cap'n Proto). Zero-copy, zero-parse. |
+| **Layout** | Binary layout schema (e.g. FlatBuffers). Zero-copy, zero-parse. |
 | **Invariants** | SMT assertions over field values that must hold at all times. |
 | **Accessors** | PCFs that read or mutate fields while preserving invariants. |
 | **Recovery** | Validation rules: checksum/version/invariants checked before exposure. |
@@ -379,12 +379,12 @@ TCB scope: LLVM toolchain components, verifier/checker binaries, linker/sealing 
 
 | Alien Stack Component | Existing Tool | Role |
 |---------------------|---------------|------|
-| Structural graph annotations | grep / `tools/extract-graph` | Call graph, data flow, CFG traversal via @tags |
+| Structural graph annotations | grep | Call graph, data flow, CFG traversal via @tags |
 | IR representation | LLVM 14+ | Code storage, optimization, compilation |
 | WASM compilation | LLVM wasm32 backend | IR → WASM bytecode |
 | WASM execution | Wasmtime / Wasmer | Sandboxed runtime with WASI |
 | SMT solving | Z3 / CVC5 | Proof discharge, invariant checking |
-| Binary data formats | FlatBuffers / Cap'n Proto | Zero-copy IPS layouts |
+| Binary data formats | FlatBuffers | Zero-copy IPS layouts |
 | Memory persistence | mmap + msync | MFO backing store |
 | Proof format | Lean 4 / Coq export | Proof witness generation (future) |
 | Fuzzing | libFuzzer / AFL | IR-level mutation testing |
@@ -396,33 +396,74 @@ TCB scope: LLVM toolchain components, verifier/checker binaries, linker/sealing 
 
 A system may claim only the highest level whose criteria are **fully met**:
 
-| Level | Name | Criteria |
-|-------|------|----------|
-| **L0** | Structural | Graph comments parse and pass consistency checks. |
-| **L1** | Contract Complete | Required functions have full PCF metadata (`pre/post/effects/bind/proof`). |
-| **L2** | Verified | Solver/checker-backed verification is fail-closed in the build. |
-| **L3** | Linked and Sealed | Link gate enforced, artifact manifest emitted with TCB capture. |
-| **L4** | Durable | IPS recovery protocol implemented and validated under crash/fault injection. |
+| Level | Name | Criteria | Demo reaching this level |
+|-------|------|----------|--------------------------|
+| **L0** | Structural | Graph comments parse and pass consistency checks. | all demos |
+| **L1** | Contract Complete | Required functions have full PCF metadata (`pre/post/effects/bind/proof`). | webserver, plaintext, ui-kit |
+| **L2** | Verified | Solver/checker-backed verification is fail-closed in the build. | **storage** |
+| **L3** | Linked and Sealed | Link gate enforced, artifact manifest emitted with TCB capture. | future work |
+| **L4** | Durable | IPS recovery protocol implemented and validated under crash/fault injection. | future work |
+
+The storage demo reaches L2: Z3 discharges SMT-LIB proof obligations and structural effect lint validates declared vs. actual syscall sets, both fail-closed. The webserver and plaintext demos reach L1: PCF metadata is complete and structurally checked, but proof discharge is not solver-backed. L3 and L4 are specified but not yet implemented.
 
 ---
 
-## 7. Demo: HTTP Server in LLVM IR
+## 7. Demonstrations
 
-This repository demonstrates practical viability of the architecture:
+The repository contains four proof-of-concept demos. Each is scoped to prove one specific claim about the architecture. They are not production software.
 
-- **`demo/webserver/server.ll`** — A native HTTP server authored entirely in LLVM IR with PCF metadata and structural graph annotations. Listens on TCP, accepts connections, responds with static HTML, enforces response invariants.
-- **`demo/webserver/fractal.ll`** — A WASM fractal module authored in LLVM IR.
-- **`demo/webserver/build.sh`** — Compilation pipeline: IR → native binary (+ WASM path).
-- **`demo/webserver/verify.sh`** — Extracts and checks SMT invariants from metadata.
+### Demo coverage
 
-### 7.1 Invariants Demonstrated
+| Demo | Conformance level reached | Claim |
+|------|:-------------------------:|-------|
+| `demo/webserver` | L1 | Agents can build a complete web stack (native server + WASM client) directly in LLVM IR |
+| `demo/plaintext` | L1 | An IR-authored server is performance-competitive with a naive Rust baseline at low-to-medium concurrency |
+| **`demo/storage`** | **L2** | **PCF contracts are formally verifiable: Z3 discharges SMT-LIB obligations; effect lint validates declared vs. actual syscall sets; IPS invariants hold under crash and recovery** |
+| `demo/ui-kit` | L1 | All UI policy and CSS generation can reside in a WASM module with a <50-line JS shim |
 
-| Invariant | Encoding | Enforcement |
-|-----------|----------|-------------|
-| Response body is never null | `!pcf.post` metadata | Static (provable from IR) |
-| Status code ∈ {200} | `!pcf.post` metadata | Static (constant propagation) |
-| Content-Length = len(body) | `!ips.inv` metadata | Runtime check in accessor |
-| Socket fd ≥ 0 after bind | `!pcf.post` metadata | Runtime check (depends on OS) |
+### 7.1 Webserver Demo (`demo/webserver`)
+
+**Claim:** The full execution surface — TCP server, static file serving, WASM fractal renderer, browser client — can be authored entirely in LLVM IR without frameworks or high-level languages.
+
+Key files:
+- **`server.ll`** — Native HTTP server with PCF metadata and structural graph annotations. Prebuilds HTTP responses at startup; enforces response invariants via `!pcf.post`.
+- **`fractal.ll`** — WASM fractal module authored in LLVM IR, rendered in-browser with a minimal JS shim.
+- **`verify.sh`** / **`link-gate.sh`** — Check PCF metadata presence and structural consistency. (Metadata completeness; not solver-backed discharge.)
+
+### 7.2 Plaintext Benchmark Demo (`demo/plaintext`)
+
+**Claim:** An LLVM IR server authored by an agent, without hand-tuning, matches or exceeds a naive Rust Hyper `current-thread` server at low-to-medium concurrency (c=256 to c=4096).
+
+At saturation (c=16384) the IR server loses to Hyper — disclosed and expected, because it uses a single-threaded accept loop. Both implementations are agent first-pass; no hand-tuning was applied to either. Benchmarks are automated in CI.
+
+### 7.3 Storage Demo — Verification Anchor (`demo/storage`)
+
+**Claim:** PCF contracts and IPS invariants are formally verifiable today, using existing tools (Z3, grep, shell).
+
+This is the deepest verification in the repository. The build pipeline runs three independent gates, all fail-closed:
+
+1. **`ips-evidence.sh`** — Seven behavioral checks against the compiled binary, including a negative-path test: a deliberately corrupted (uncommitted) header must cause `recover` to exit non-zero.
+
+2. **`verify-pcf.sh`** — Invokes Z3 on two SMT-LIB obligation files:
+   - `checksum-z3.smt2`: proves the `checksum_for` IR implementation matches its PCF postcondition.
+   - `roundtrip-z3.smt2`: proves write→read accepts committed state and always rejects uncommitted state.
+   All `check-sat` calls must return `unsat`. Any `sat` or `unknown` is a build failure.
+
+3. **`effect-lint.sh`** — Parses `ips.ll`, extracts actual external call targets from each function body, maps them to effect atoms (`libc.pwrite`, `libc.fsync`, etc.), and compares against the function's `!pcf.effects` declaration. Under-declaration is a hard error; over-declaration is a warning.
+
+| Invariant | Encoding | Enforcement mechanism |
+|-----------|----------|-----------------------|
+| `checksum_for` result matches postcondition | `!pcf.post` + `checksum-z3.smt2` | Z3 solver discharge (`unsat`) |
+| Write→read roundtrip accepts committed state | `roundtrip-z3.smt2` | Z3 solver discharge (`unsat`) |
+| Uncommitted state always rejected | `roundtrip-z3.smt2` | Z3 solver discharge (`unsat`) |
+| Declared effects ⊇ actual syscalls | `!pcf.effects` + `effect-lint.sh` | Structural IR parse, fail-closed |
+| Corrupt header causes recovery failure | `ips-evidence.sh` (check 7) | Behavioral negative-path test |
+
+### 7.4 UI Kit Demo (`demo/ui-kit`)
+
+**Claim:** The browser can be treated as a minimal host substrate. All UI policy, interaction state, and CSS generation reside in a WASM module compiled from LLVM IR; the browser-facing interface is a <50-line JS device-driver shim.
+
+Renders interactive components (button, card, input) with hover and focus states. The WASM module dynamically injects raw CSS strings into the DOM at initialization. No React, Vue, Svelte, Bootstrap, or Tailwind. Validates one interactive component; not a complete component library.
 
 ---
 
@@ -498,17 +539,13 @@ A system qualifies as Alien Stack-compliant when:
 
 ## 12. Conclusion
 
-The last stack humans build should be the one that makes human-built stacks unnecessary. But it won't be built in a single leap.
+The central claim of this paper is modest: agents that work primarily through text search and sequential file reads would benefit from structural annotations co-resident with code, and from explicit machine-readable contracts on exported behavior. Neither of these requires new tools — grep and LLVM metadata already exist.
 
-Agents today think in text — and that's fine. The mistake would be either ignoring that fact or treating it as permanent. Alien Stack starts where agents already are: reading text files, using grep, writing comments. Structural graph annotations require no tooling at all. Add `@calls`, `@called-by`, `@reads`, `@inv` comments to your code files. Agents grep them. That's it. The graph *is* the code.
+The stronger claim — that this represents a viable long-term direction for agent-native software — remains an open empirical question. The hypotheses in §8 define what evidence would support or falsify it. The demos establish that the approach is technically coherent at small scale. Whether it generalizes to larger systems, whether solver-backed verification remains tractable, and whether agents actually navigate annotated codebases more efficiently than unannotated ones are questions this paper cannot answer — they require measurement.
 
-From there, the architecture deepens: LLVM IR as canonical source, formal contracts on every export, proof-carrying linkage, effect validation, and ultimately self-modifying agents that optimize their own verified code at runtime.
+What the paper does establish is a concrete, staged path: structured comments (immediately adoptable), LLVM IR as canonical source (available today), formal contracts at link time (specified here, partially implemented), and artifact sealing (specified here, not yet implemented). Each stage is independently useful. Adoption does not require belief in the full vision.
 
-Every stage is independently useful. You don't need to believe in the long-term vision to benefit from structured comments today.
-
-The tools exist. Grep exists. LLVM IR is mature. SMT solvers are fast. WASM runtimes are production-grade. What remains is convention: agreeing on the tags, writing them consistently, and building the habit of treating comments as navigable structure rather than prose.
-
-This is the last stack. It starts with a comment.
+The tools referenced in this paper — LLVM, Z3, WASM runtimes, grep — are mature and widely deployed. What this paper contributes is a convention for using them together in a way that is navigable by agents operating under current constraints.
 
 ---
 
@@ -519,6 +556,5 @@ This is the last stack. It starts with a comment.
 3. Haas, A., et al. (2017). Bringing the Web up to Speed with WebAssembly. *PLDI '17*.
 4. Necula, G. C. (1997). Proof-Carrying Code. *POPL '97*.
 5. Google. (2014). FlatBuffers: Memory Efficient Serialization Library.
-6. Sandstrom, K., et al. (2014). Cap'n Proto: Infinity Times Faster Than Protocol Buffers.
-7. Bytecode Alliance. (2019). Wasmtime: A Fast and Secure Runtime for WebAssembly.
-8. WASI. (2019). WebAssembly System Interface. *Bytecode Alliance*.
+6. Bytecode Alliance. (2019). Wasmtime: A Fast and Secure Runtime for WebAssembly.
+7. WASI. (2019). WebAssembly System Interface. *Bytecode Alliance*.
