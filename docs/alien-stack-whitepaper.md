@@ -12,7 +12,7 @@ Software development has been shaped by human cognitive constraints for seven de
 
 But reexamination does not mean wholesale replacement. Current agent coders — large language models — are themselves text-native. They read text, reason in text, and emit text. Asking them to abandon text for raw IR is like asking a carpenter to work without hands. The transition must be incremental, and every stage must be independently useful.
 
-**Alien Stack** defines an end-state architecture for software built primarily by coding agents: executable behavior authored in LLVM IR, machine-checkable contracts attached to every exported function, structural graph annotations navigable with grep, and release artifacts gated by formal verification. Text remains the agent-facing interface. Formal contracts create higher assurances for software that is built and run without human intervention — not by replacing tests, but by raising the floor of correctness that tests validate against. The build succeeds only when contracts are discharged, effects are declared, and artifacts are reproducible.
+**Alien Stack** proposes an architecture for software built primarily by coding agents: executable behavior authored in LLVM IR, machine-checkable contracts attached to every exported function, structural graph annotations navigable with grep, and release artifacts gated by formal verification. Text remains the agent-facing interface. Formal contracts create higher assurances for software that is built and run without human intervention — not by replacing tests, but by raising the floor of correctness that tests validate against. The build succeeds only when contracts are discharged, effects are declared, and artifacts are reproducible.
 
 This paper specifies the architecture, the rationale behind it, and a concrete path from today's text-only codebases to the fully verified target.
 
@@ -24,7 +24,7 @@ This paper specifies the architecture, the rationale behind it, and a concrete p
 
 Modern software stacks impose five categories of overhead that exist solely to accommodate human cognition:
 
-1. **Parsing overhead.** Source code is text. Text must be lexed, parsed into ASTs, type-checked, lowered to IR, optimized, and emitted as machine code. Each transformation is a potential source of bugs and a barrier to formal reasoning. An agent coder gains nothing from the text representation — it is a detour.
+1. **Parsing overhead.** Source code is text. Text must be lexed, parsed into ASTs, type-checked, lowered to IR, optimized, and emitted as machine code. Each transformation is a potential source of bugs and a barrier to formal reasoning. An agent coder that targets IR directly can skip this pipeline — though it trades the ergonomic benefits of high-level syntax for the verbosity of a lower-level representation.
 
 2. **Semantic ambiguity.** Human languages are ambiguous by design. Programming languages inherit this: operator overloading, implicit conversions, dynamic dispatch, macro expansion. Each feature adds expressiveness for humans at the cost of formal tractability. An agent reasons more effectively over a representation with explicit semantics.
 
@@ -34,7 +34,7 @@ Modern software stacks impose five categories of overhead that exist solely to a
 
 5. **Library indirection.** Human developers use libraries to avoid re-implementing solved problems. But libraries introduce dependency graphs, version conflicts, API surface area, and trust boundaries. In the human-centric model, libraries are essential because no individual can maintain everything — shared maintenance, security patching, and ecosystem coordination require social infrastructure.
 
-   Agent coders change this calculus fundamentally. An agent that is both engineer and compiler can re-derive a patched implementation from a specification faster than it can track upstream changelogs. When the agent can verify the inlined result against a formal contract, the trust boundary that justified the library abstraction dissolves. Libraries remain useful for hardware-specific optimizations and externally mandated interfaces (e.g., TLS compliance), but the default posture shifts from "import a dependency" to "generate a verified implementation."
+   Agent coders may shift this calculus. An agent that can re-derive a patched implementation from a specification and verify the result against a formal contract has less need for the shared-maintenance infrastructure that libraries provide. The trust boundary that justifies a library abstraction shrinks when the agent can author and verify an equivalent inline implementation. Libraries remain appropriate for hardware-specific optimizations, externally mandated interfaces (e.g., TLS compliance), and cases where re-derivation cost exceeds the dependency cost. But the default posture becomes worth questioning.
 
 ### 1.2 The Agent Text Problem
 
@@ -161,7 +161,7 @@ grep "@inv" *.ll
 → every correctness property in the system, with context
 ```
 
-Five greps. Complete system understanding. No sidecar, no database, no tooling.
+Five greps. Structural understanding of the system without reading every file. No sidecar, no database, no additional tooling.
 
 ### 3.4 Why This Works
 
@@ -498,17 +498,13 @@ A system qualifies as Alien Stack-compliant when:
 
 ## 12. Conclusion
 
-The last stack humans build should be the one that makes human-built stacks unnecessary. But it won't be built in a single leap.
+The central claim of this paper is modest: agents that work primarily through text search and sequential file reads would benefit from structural annotations co-resident with code, and from explicit machine-readable contracts on exported behavior. Neither of these requires new tools — grep and LLVM metadata already exist.
 
-Agents today think in text — and that's fine. The mistake would be either ignoring that fact or treating it as permanent. Alien Stack starts where agents already are: reading text files, using grep, writing comments. Structural graph annotations require no tooling at all. Add `@calls`, `@called-by`, `@reads`, `@inv` comments to your code files. Agents grep them. That's it. The graph *is* the code.
+The stronger claim — that this represents a viable long-term direction for agent-native software — remains an open empirical question. The hypotheses in §8 define what evidence would support or falsify it. The demos establish that the approach is technically coherent at small scale. Whether it generalizes to larger systems, whether solver-backed verification remains tractable, and whether agents actually navigate annotated codebases more efficiently than unannotated ones are questions this paper cannot answer — they require measurement.
 
-From there, the architecture deepens: LLVM IR as canonical source, formal contracts on every export, proof-carrying linkage, effect validation, and ultimately self-modifying agents that optimize their own verified code at runtime.
+What the paper does establish is a concrete, staged path: structured comments (immediately adoptable), LLVM IR as canonical source (available today), formal contracts at link time (specified here, partially implemented), and artifact sealing (specified here, not yet implemented). Each stage is independently useful. Adoption does not require belief in the full vision.
 
-Every stage is independently useful. You don't need to believe in the long-term vision to benefit from structured comments today.
-
-The tools exist. Grep exists. LLVM IR is mature. SMT solvers are fast. WASM runtimes are production-grade. What remains is convention: agreeing on the tags, writing them consistently, and building the habit of treating comments as navigable structure rather than prose.
-
-This is the last stack. It starts with a comment.
+The tools referenced in this paper — LLVM, Z3, WASM runtimes, grep — are mature and widely deployed. What this paper contributes is a convention for using them together in a way that is navigable by agents operating under current constraints.
 
 ---
 

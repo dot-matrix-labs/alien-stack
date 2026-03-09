@@ -1,4 +1,4 @@
-# The Last Stack: Isomorphic AI-Native Client Architecture
+# Isomorphic AI-Native Client Architecture
 
 **Version 1.0 - March 2026**
 
@@ -6,7 +6,7 @@
 
 ## Abstract
 
-This paper extends the Alien Stack server-side architecture (see `docs/alien-stack-whitepaper.md`, v1.2) to client execution environments. It introduces a **isomorphic client architecture** in which all application policy, layout, and state reside in AI-generated WebAssembly modules, and the browser is treated as a minimal host substrate—a window-system microkernel. The primary objective is to **completely replace high-level JS frameworks (React, Vue) and CSS frameworks (Bootstrap, Tailwind)** with agent-optimized, proof-carrying IR, achieving extreme tree-shaking for the browser runtime. This document applies the same empirical, evidence-first methodology and conformance-level model as the server-side specification: claims are grounded in observable repository state, conformance levels are measurement-based rather than aspirational, and hypotheses are falsifiable.
+This paper extends the Alien Stack server-side architecture (see `docs/alien-stack-whitepaper.md`, v2.0) to client execution environments. It specifies an **isomorphic client architecture** in which all application policy, layout, and state reside in agent-generated WebAssembly modules, and the browser is treated as a minimal host substrate — a thin syscall surface rather than a high-level runtime. The goal is to determine whether the same structural properties the server-side architecture provides (machine-checkable contracts, minimal TCB, reproducible artifacts) can be achieved for client-side code by eliminating JS and CSS frameworks in favor of a formally specified Wasm module and a narrow host ABI. This document applies the same empirical methodology and conformance-level model as the server-side specification: claims are grounded in observable repository state, conformance levels are measurement-based rather than aspirational, and hypotheses are falsifiable.
 
 The client architecture is a direct extension of the Alien Stack thesis:
 
@@ -252,7 +252,7 @@ These eliminations are not novel constraints. They are the client-side applicati
 | **Agent navigability** | Structural graph comments; agents traverse via grep without execution. |
 | **Cross-runtime portability** | Same Wasm module targets browser, embedded Wasm runtimes, or WASI-compliant hosts with a different shim. |
 | **Auditable release** | Artifact seal with digests of all executable components. |
-| **Scalable complexity** | Agent can generate arbitrarily complex UI policy; correctness is bounded by verification, not by human readability. |
+| **Scalable complexity** | UI policy complexity is bounded by the verifier rather than by human readability, which may allow agents to generate denser policy than would otherwise be reviewable. |
 
 ---
 

@@ -4,7 +4,7 @@ This document defines the requirements, constraints, architecture, and developme
 
 ## 1. Goal
 
-Create a demonstration of a feature-rich, interactive UI component library that provides modern, premium aesthetics (similar to Tailwind CSS), but operates under the strict constraints of the Alien Stack client architecture (`docs/isomorphic-web-whitepaper.md`). The objective is to **completely replace high-level JS frameworks (React, etc.) and CSS frameworks (Bootstrap, Tailwind, etc.)** with agent-optimized, proof-carrying IR, resulting in extreme tree-shaking for the browser runtime.
+Demonstrate UI component rendering under the strict constraints of the Alien Stack client architecture (`docs/isomorphic-web-whitepaper.md`): all logic and styling reside in a Wasm module compiled from LLVM IR, with no JS or CSS frameworks. The demo validates that interactive components with dynamic styling are achievable within these constraints; it is not intended as a complete component library.
 
 ## 2. Constraints (Non-Negotiable)
 
