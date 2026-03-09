@@ -1,5 +1,5 @@
-// dev.bun.ts - Full development loop
-// Usage: bun run scripts/dev.bun.ts [--component NAME]
+// dev.ts - Full development loop
+// Usage: bun run scripts/dev.ts [--component NAME]
 //
 // Steps:
 // 1. Build Wasm from .ll files
@@ -43,7 +43,7 @@ async function main() {
     await runBuild();
     
     console.log('✅ Development loop complete');
-    console.log(`Serve with: bun run scripts/serve.bun.ts --port ${PORT}`);
+    console.log(`Serve with: bun run scripts/serve.ts --port ${PORT}`);
     
   } catch (e) {
     console.error('❌ Error:', e);

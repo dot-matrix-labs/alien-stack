@@ -1,5 +1,5 @@
-// screenshot.bun.ts - Take screenshot using Playwright
-// Usage: bun run scripts/screenshot.bun.ts [url] [output]
+// screenshot.ts - Take screenshot using Playwright
+// Usage: bun run scripts/screenshot.ts [url] [output]
 //
 // Requires: bun add -d playwright && bunx playwright install chromium
 

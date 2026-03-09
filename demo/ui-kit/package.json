@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "test": "bun run scripts/test.bun.ts"
+    "test": "bun run scripts/test.ts"
   },
   "dependencies": {},
   "devDependencies": {

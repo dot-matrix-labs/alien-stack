@@ -1,5 +1,5 @@
-// serve.bun.ts - Static file server using Bun
-// Usage: bun run scripts/serve.bun.ts [--port N] [--root DIR]
+// serve.ts - Static file server using Bun
+// Usage: bun run scripts/serve.ts [--port N] [--root DIR]
 
 const args = process.argv.slice(2);
 let port = 8080;

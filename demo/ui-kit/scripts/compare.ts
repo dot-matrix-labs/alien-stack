@@ -1,5 +1,5 @@
-// compare.bun.ts - Compare screenshots and DOM
-// Usage: bun run scripts/compare.bun.ts [ref-dir] [dev-dir]
+// compare.ts - Compare screenshots and DOM
+// Usage: bun run scripts/compare.ts [ref-dir] [dev-dir]
 
 import { existsSync, readFileSync } from 'fs';
 import path from 'path';

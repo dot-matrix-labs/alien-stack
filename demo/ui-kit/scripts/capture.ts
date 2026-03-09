@@ -1,5 +1,5 @@
-// capture.bun.ts - Capture screenshot and DOM dump using Playwright
-// Usage: bun run scripts/capture.bun.ts [html-file] [output-name]
+// capture.ts - Capture screenshot and DOM dump using Playwright
+// Usage: bun run scripts/capture.ts [html-file] [output-name]
 
 import { chromium } from 'playwright';
 import { mkdir, writeFile } from 'fs/promises';

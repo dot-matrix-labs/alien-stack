@@ -1,5 +1,5 @@
-// test.bun.ts - Playwright test: verify button renders on load
-// Usage: bun run scripts/test.bun.ts
+// test.ts - Playwright test: verify button renders on load
+// Usage: bun run scripts/test.ts
 
 import { chromium } from 'playwright';
 

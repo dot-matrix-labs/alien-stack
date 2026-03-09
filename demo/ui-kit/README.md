@@ -43,7 +43,7 @@ Compile the IR to Wasm:
 Serve the `index.html` locally:
 
 ```bash
-bun run scripts/serve.bun.ts
+bun run scripts/serve.ts
 ```
 
 Open `http://localhost:8080` in your browser.
