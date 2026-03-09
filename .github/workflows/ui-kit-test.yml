@@ -1,0 +1,43 @@
+name: ui-kit-test
+
+on:
+  push:
+    branches:
+      - demo/ui-kit
+  pull_request:
+    branches:
+      - demo/ui-kit
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install LLVM and Clang
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-18 llvm-18 lld-18
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: |
+          cd demo/ui-kit
+          bun install
+          bunx playwright install --with-deps chromium
+
+      - name: Build Wasm
+        run: |
+          chmod +x demo/ui-kit/build.sh
+          export CLANG_CMD=clang-18
+          ./demo/ui-kit/build.sh
+
+      - name: Run Playwright Tests
+        run: |
+          cd demo/ui-kit
+          bun run test

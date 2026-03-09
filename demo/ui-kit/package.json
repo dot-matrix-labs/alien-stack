@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "test": "bun run scripts/test.ts"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "playwright": "^1.58.2"
+  }
+}
